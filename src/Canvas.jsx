@@ -103,6 +103,7 @@ function Canvas() {
       0.1,
       1000
     );
+    scene.add(perspectiveCamera);
     const frustrum = 5;
     const orthographicCamera = new THREE.OrthographicCamera(
       ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
@@ -112,6 +113,15 @@ function Canvas() {
       -100,
       100
     );
+    scene.add(orthographicCamera);
+
+    // HELPERS
+    const size = 10;
+    const divisions = 10;
+    const gridHelper = new THREE.GridHelper(size, divisions);
+    scene.add(gridHelper);
+    const axesHelper = new THREE.AxesHelper(10);
+    scene.add(axesHelper);
 
     // LIGHTS
     const sunLight = new THREE.DirectionalLight("#ffffff", 3);
@@ -137,8 +147,9 @@ function Canvas() {
     if (ready === true) {
       const room = items.room;
       const actualRoom = room.scene;
-      console.log(actualRoom);
       scene.add(actualRoom);
+      actualRoom.scale.set(0.11, 0.11, 0.11);
+      /* actualRoom.rotation.y = Math.PI * 2; */
     }
 
     /* const geometry = new THREE.BoxGeometry(1, 1, 1);
