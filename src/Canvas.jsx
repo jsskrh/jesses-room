@@ -127,11 +127,13 @@ function Canvas() {
     const sunLight = new THREE.DirectionalLight("#ffffff", 3);
     sunLight.castShadow = true;
     sunLight.shadow.camera.far = 20;
-    sunLight.shadow.mapSize.set(1024, 1024);
+    sunLight.shadow.mapSize.set(2048, 2048);
     sunLight.shadow.normalBias = 0.05;
     sunLight.position.set(1.5, 7, 3);
     scene.add(sunLight);
     /* sunLight.shadow.camera.far=set(x:number, y:number,z:number):THREE.Vector3 */
+    const ambientLight = new THREE.AmbientLight("#ffffff", 1);
+    scene.add(ambientLight);
 
     // ORBIT CONTROLS
     const controls = new OrbitControls(perspectiveCamera, renderer.domElement);
