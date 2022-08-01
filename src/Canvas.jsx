@@ -149,6 +149,17 @@ function Canvas() {
       const actualRoom = room.scene;
       scene.add(actualRoom);
       actualRoom.scale.set(0.11, 0.11, 0.11);
+      actualRoom.children.forEach((child) => {
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        if (child instanceof THREE.Group) {
+          child.children.forEach((groupChild) => {
+            groupChild.castShadow = true;
+            groupChild.receiveShadow = true;
+          });
+        }
+      });
       /* actualRoom.rotation.y = Math.PI * 2; */
     }
 
