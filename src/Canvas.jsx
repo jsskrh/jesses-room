@@ -1,14 +1,102 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import "./Canvas.css";
+import assets from "./assets";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 function Canvas() {
+  /* var events = require("events"); */
+  /* const EventEmitter = require("events");
+  const eventEmitter = new EventEmitter(); */
+
+  const [items, setItems] = useState({});
+  const [ready, setReady] = useState(false);
+
   const experienceRef = useRef(null);
   const experience = experienceRef.current;
 
   useEffect(() => {
+    const queue = assets.length;
+    let items = {};
+    let loaded = 0;
+    let loaders = {};
+
+    const setLoaders = () => {
+      loaders.gltfLoader = new GLTFLoader();
+      loaders.dracoLoader = new DRACOLoader();
+      loaders.dracoLoader.setDecoderPath(
+        "/node_modules/three/examples/js/libs/draco/"
+      );
+      loaders.gltfLoader.setDRACOLoader(loaders.dracoLoader);
+    };
+
+    const startLoading = () => {
+      for (const asset of assets) {
+        if (asset.type === "glbModel") {
+          loaders.gltfLoader.load(asset.path, (file) => {
+            singleAssetLoaded(asset, file);
+          });
+        } else if (asset.type === "videoTexture") {
+          let video = {};
+          let videoTexture = {};
+
+          video[asset.name] = document.createElement("video");
+          video[asset.name].src = asset.path;
+          video[asset.name].muted = true;
+          video[asset.name].playsInline = true;
+          video[asset.name].autoplay = true;
+          video[asset.name].loop = true;
+          video[asset.name].play();
+
+          videoTexture[asset.name] = new THREE.VideoTexture(video[asset.name]);
+          videoTexture[asset.name].flipY = true;
+          videoTexture[asset.name].minFilter = THREE.NearestFilter;
+          videoTexture[asset.name].magFilter = THREE.NearestFilter;
+          videoTexture[asset.name].generateMipMaps = false;
+          videoTexture[asset.name].encoding = THREE.sRGBEncoding;
+          singleAssetLoaded(asset, videoTexture[asset.name]);
+        }
+      }
+    };
+
+    const singleAssetLoaded = (asset, file) => {
+      items[asset.name] = file;
+      loaded++;
+
+      if (loaded === queue) {
+        console.log("first ran");
+        /* emit("ready"); */
+        setItems(items);
+        setReady(true);
+      }
+    };
+
+    setLoaders();
+    startLoading();
+  }, []);
+
+  useEffect(() => {
+    // RENDERER
+    const renderer = new THREE.WebGLRenderer({
+      /* canvas: this.canvas, */
+      antialias: true,
+    });
+    renderer.physicallyCorrectLights = true;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.CineonToneMapping;
+    renderer.toneMappingExposure = 1.75;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    experienceRef.current.appendChild(renderer.domElement);
+
+    // SCENE
     const scene = new THREE.Scene();
-    const aspect = window.innerWidth / window.innerHeight;
+
+    // CAMERA
     const perspectiveCamera = new THREE.PerspectiveCamera(
       35,
       window.innerWidth / window.innerHeight,
@@ -25,45 +113,38 @@ function Canvas() {
       100
     );
 
-    const renderer = new THREE.WebGLRenderer({
-      /* canvas: this.canvas, */
-      antialias: true,
-    });
-    renderer.physicallyCorrectLights = true;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.CineonToneMapping;
-    renderer.toneMappingExposure = 1.75;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // LIGHTS
+    const sunLight = new THREE.DirectionalLight("#ffffff", 3);
+    sunLight.castShadow = true;
+    sunLight.shadow.camera.far = 20;
+    sunLight.shadow.mapSize.set(1024, 1024);
+    sunLight.shadow.normalBias = 0.05;
+    sunLight.position.set(1.5, 7, 3);
+    scene.add(sunLight);
+    /* sunLight.shadow.camera.far=set(x:number, y:number,z:number):THREE.Vector3 */
+
+    // ORBIT CONTROLS
+    const controls = new OrbitControls(perspectiveCamera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enableZoom = true;
 
     let start = Date.now();
     let current = start;
     let elapsed = 0;
     let delta = 16;
 
-    /* const update = () => {
-      let currentTime = Date.now();
-      delta = currentTime - current;
-      current = currentTime;
-      elapsed = current - start;
-
-      console.log(delta);
-      window.requestAnimationFrame(() => {
-        update();
-      });
-    };
- */
-    /* update(); */
-
-    experienceRef.current.appendChild(renderer.domElement);
-
     // ROOM
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    if (ready === true) {
+      const room = items.room;
+      const actualRoom = room.scene;
+      console.log(actualRoom);
+      scene.add(actualRoom);
+    }
+
+    /* const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    const cube = new THREE.Mesh(geometry, material); */
+    /* scene.add(cube); */
 
     perspectiveCamera.position.z = 5;
 
@@ -72,14 +153,7 @@ function Canvas() {
       delta = currentTime - current;
       current = currentTime;
       elapsed = current - start;
-
-      /* console.log(delta); */
-
       requestAnimationFrame(animate);
-
-      /* cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01; */
-
       renderer.render(scene, perspectiveCamera);
     };
 
@@ -102,7 +176,15 @@ function Canvas() {
     animate();
 
     return () => experienceRef.current.removeChild(renderer.domElement);
-  }, []);
+  }, [ready]);
+
+  /* useEffect(() => {
+    if (ready === true) {
+      const room = items.room;
+      const actualRoom = room.scene;
+      scene.add(actualRoom);
+    }
+  }, [ready]); */
 
   return <div className="experience" ref={experienceRef}></div>;
 }
