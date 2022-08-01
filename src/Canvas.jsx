@@ -12,6 +12,8 @@ function Canvas() {
   const eventEmitter = new EventEmitter(); */
 
   const [items, setItems] = useState({});
+  const [actualRoom, setActualRoom] = useState({});
+  const [room, setRoom] = useState({});
   const [ready, setReady] = useState(false);
 
   const experienceRef = useRef(null);
@@ -104,24 +106,34 @@ function Canvas() {
       1000
     );
     scene.add(perspectiveCamera);
+    perspectiveCamera.position.z = 12;
+    perspectiveCamera.position.x = 29;
+    perspectiveCamera.position.y = 14;
     const frustrum = 5;
     const orthographicCamera = new THREE.OrthographicCamera(
       ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
       ((window.innerWidth / window.innerHeight) * frustrum) / 2,
       frustrum / 2,
       -frustrum / 2,
-      -100,
-      100
+      -10,
+      10
     );
     scene.add(orthographicCamera);
 
     // HELPERS
-    const size = 10;
-    const divisions = 10;
+    const size = 20;
+    const divisions = 20;
     const gridHelper = new THREE.GridHelper(size, divisions);
     scene.add(gridHelper);
     const axesHelper = new THREE.AxesHelper(10);
     scene.add(axesHelper);
+    const helper = new THREE.CameraHelper(orthographicCamera);
+    scene.add(helper);
+    helper.matrixWorldNeedsUpdate = true;
+    helper.update();
+    helper.position.copy(orthographicCamera.position);
+    helper.rotation.copy(orthographicCamera.rotation);
+    console.log(helper.position);
 
     // LIGHTS
     const sunLight = new THREE.DirectionalLight("#ffffff", 3);
@@ -129,7 +141,7 @@ function Canvas() {
     sunLight.shadow.camera.far = 20;
     sunLight.shadow.mapSize.set(2048, 2048);
     sunLight.shadow.normalBias = 0.05;
-    sunLight.position.set(1.5, 7, 3);
+    sunLight.position.set(-1.5, 7, 3);
     scene.add(sunLight);
     /* sunLight.shadow.camera.far=set(x:number, y:number,z:number):THREE.Vector3 */
     const ambientLight = new THREE.AmbientLight("#ffffff", 1);
@@ -140,6 +152,28 @@ function Canvas() {
     controls.enableDamping = true;
     controls.enableZoom = true;
 
+    // CONTROLS
+    //Create a closed wavey loop
+    const curve = new THREE.CatmullRomCurve3(
+      [
+        new THREE.Vector3(-10, 0, 10),
+        new THREE.Vector3(-5, 5, 5),
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(5, -5, 5),
+        new THREE.Vector3(10, 0, 10),
+      ],
+      true
+    );
+
+    const points = curve.getPoints(50);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+    const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+
+    // Create the final object to add to the scene
+    const curveObject = new THREE.Line(geometry, material);
+    scene.add(curveObject);
+
     let start = Date.now();
     let current = start;
     let elapsed = 0;
@@ -148,7 +182,9 @@ function Canvas() {
     // ROOM
     if (ready === true) {
       const room = items.room;
+      setRoom(room);
       const actualRoom = room.scene;
+      setActualRoom(actualRoom);
       scene.add(actualRoom);
       actualRoom.scale.set(0.11, 0.11, 0.11);
       actualRoom.children.forEach((child) => {
@@ -162,6 +198,7 @@ function Canvas() {
           });
         }
 
+        // unhide aqua glass in blender
         if (child.name === "AquaGlass") {
           child.material = new THREE.MeshPhysicalMaterial();
           child.material.roughness = 0;
@@ -171,6 +208,7 @@ function Canvas() {
           child.material.opacity = 1;
         }
 
+        // flip screen in blender
         if (child.name === "Screen") {
           child.material = new THREE.MeshBasicMaterial({
             map: items.screen,
@@ -185,13 +223,20 @@ function Canvas() {
     const cube = new THREE.Mesh(geometry, material); */
     /* scene.add(cube); */
 
-    perspectiveCamera.position.z = 5;
-
     const animate = () => {
       let currentTime = Date.now();
       delta = currentTime - current;
       current = currentTime;
       elapsed = current - start;
+
+      // fix fish animation
+      if (Object.keys(room).length !== 0) {
+        const mixer = new THREE.AnimationMixer(actualRoom);
+        const swim = mixer.clipAction(room.animations[155]);
+        swim.play();
+        mixer.update(delta * 0.009);
+      }
+
       requestAnimationFrame(animate);
       renderer.render(scene, perspectiveCamera);
     };
@@ -214,8 +259,10 @@ function Canvas() {
 
     animate();
 
+    console.log(room.animations);
+
     return () => experienceRef.current.removeChild(renderer.domElement);
-  }, [ready]);
+  }, [ready, room]);
 
   /* useEffect(() => {
     if (ready === true) {
