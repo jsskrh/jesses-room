@@ -5,6 +5,7 @@ import assets from "./assets";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import GSAP from "gsap";
 
 function Canvas() {
   /* var events = require("events"); */
@@ -15,6 +16,7 @@ function Canvas() {
   const [actualRoom, setActualRoom] = useState({});
   const [room, setRoom] = useState({});
   const [ready, setReady] = useState(false);
+  /* const [progress, setProgress] = useState(0); */
 
   const experienceRef = useRef(null);
   const experience = experienceRef.current;
@@ -68,7 +70,7 @@ function Canvas() {
       loaded++;
 
       if (loaded === queue) {
-        console.log("first ran");
+        /* console.log("first ran"); */
         /* emit("ready"); */
         setItems(items);
         setReady(true);
@@ -106,19 +108,24 @@ function Canvas() {
       1000
     );
     scene.add(perspectiveCamera);
-    perspectiveCamera.position.z = 12;
     perspectiveCamera.position.x = 29;
     perspectiveCamera.position.y = 14;
+    perspectiveCamera.position.z = 12;
     const frustrum = 5;
-    const orthographicCamera = new THREE.OrthographicCamera(
-      ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
+    const orthographicCamera = new THREE.PerspectiveCamera(
+      /* ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
       ((window.innerWidth / window.innerHeight) * frustrum) / 2,
       frustrum / 2,
       -frustrum / 2,
       -10,
-      10
+      10 */
+      35,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
     );
     scene.add(orthographicCamera);
+    console.log(orthographicCamera);
 
     // HELPERS
     const size = 20;
@@ -133,7 +140,7 @@ function Canvas() {
     helper.update();
     helper.position.copy(orthographicCamera.position);
     helper.rotation.copy(orthographicCamera.rotation);
-    console.log(helper.position);
+    /* console.log(helper.position); */
 
     // LIGHTS
     const sunLight = new THREE.DirectionalLight("#ffffff", 3);
@@ -150,17 +157,22 @@ function Canvas() {
     // ORBIT CONTROLS
     const controls = new OrbitControls(perspectiveCamera, renderer.domElement);
     controls.enableDamping = true;
-    controls.enableZoom = true;
+    controls.enableZoom = false;
 
     // CONTROLS
     //Create a closed wavey loop
+    const lerp = {
+      current: 0,
+      target: 0,
+      ease: 0.1,
+    };
+
     const curve = new THREE.CatmullRomCurve3(
       [
-        new THREE.Vector3(-10, 0, 10),
-        new THREE.Vector3(-5, 5, 5),
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(5, -5, 5),
-        new THREE.Vector3(10, 0, 10),
+        new THREE.Vector3(-5, 0, 0),
+        new THREE.Vector3(0, 0, -5),
+        new THREE.Vector3(5, 0, 0),
+        new THREE.Vector3(0, 0, 5),
       ],
       true
     );
@@ -171,8 +183,62 @@ function Canvas() {
     const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
 
     // Create the final object to add to the scene
-    const curveObject = new THREE.Line(geometry, material);
-    scene.add(curveObject);
+    let progress = 0;
+    const curvePath = () => {
+      const dummyCurve = new THREE.Vector3(0, 0, 0);
+      const position = new THREE.Vector3(0, 0, 0);
+      const lookAtPosition = new THREE.Vector3(0, 0, 0);
+      const directionalVector = new THREE.Vector3(0, 0, 0);
+      const staticVector = new THREE.Vector3(0, 1, 0);
+      const crossVector = new THREE.Vector3(0, 1, 0);
+
+      lerp.current = GSAP.utils.interpolate(
+        lerp.current,
+        lerp.target,
+        lerp.ease
+      );
+
+      curve.getPointAt(lerp.current % 1, position);
+      orthographicCamera.position.copy(position);
+
+      directionalVector.subVectors(
+        curve.getPointAt((lerp.current % 1) + 0.000001),
+        position
+      );
+      directionalVector.normalize();
+      crossVector.crossVectors(directionalVector, staticVector);
+      orthographicCamera.lookAt(crossVector);
+
+      /* const curveObject = new THREE.Line(geometry, material);
+      scene.add(curveObject); */
+
+      /* curve.getPointAt(lerp.current, position); */
+
+      /*  orthographicCamera.position.copy(position); */
+
+      requestAnimationFrame(curvePath);
+    };
+
+    const onWheel = () => {
+      window.addEventListener("wheel", (e) => {
+        if (e.deltaY > 0) {
+          lerp.target += 0.01;
+          /* back = false; */
+        } else {
+          lerp.target -= 0.01;
+          /* back = true; */
+        }
+        /* if (back) {
+          lerp.target -= 0.001;
+        } else {
+          lerp.target += 0.001;
+        } */
+      });
+    };
+
+    onWheel();
+
+    curvePath();
 
     let start = Date.now();
     let current = start;
@@ -229,6 +295,11 @@ function Canvas() {
       current = currentTime;
       elapsed = current - start;
 
+      /* console.log("start");
+      console.log(delta); */
+
+      /* console.log(current); */
+
       // fix fish animation
       if (Object.keys(room).length !== 0) {
         const mixer = new THREE.AnimationMixer(actualRoom);
@@ -259,10 +330,10 @@ function Canvas() {
 
     animate();
 
-    console.log(room.animations);
+    /* console.log(room.animations); */
 
     return () => experienceRef.current.removeChild(renderer.domElement);
-  }, [ready, room]);
+  }, [ready /* , room */]);
 
   /* useEffect(() => {
     if (ready === true) {
