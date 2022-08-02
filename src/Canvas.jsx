@@ -82,9 +82,14 @@ function Canvas() {
   }, []);
 
   useEffect(() => {
+    const lerp = {
+      current: 0,
+      target: 0,
+      ease: 0.1,
+    };
+
     // RENDERER
     const renderer = new THREE.WebGLRenderer({
-      /* canvas: this.canvas, */
       antialias: true,
     });
     renderer.physicallyCorrectLights = true;
@@ -112,34 +117,35 @@ function Canvas() {
     perspectiveCamera.position.y = 14;
     perspectiveCamera.position.z = 12;
     const frustrum = 5;
-    const orthographicCamera = new THREE.PerspectiveCamera(
-      /* ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
+    const orthographicCamera = new THREE.OrthographicCamera(
+      ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
       ((window.innerWidth / window.innerHeight) * frustrum) / 2,
       frustrum / 2,
       -frustrum / 2,
-      -10,
-      10 */
-      35,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
+      -50,
+      50
     );
+
+    orthographicCamera.position.y = 4;
+    orthographicCamera.position.z = 5;
+    orthographicCamera.rotation.x = -Math.PI / 6;
+
     scene.add(orthographicCamera);
     console.log(orthographicCamera);
 
     // HELPERS
     const size = 20;
     const divisions = 20;
-    const gridHelper = new THREE.GridHelper(size, divisions);
-    scene.add(gridHelper);
+    /* const gridHelper = new THREE.GridHelper(size, divisions);
+    scene.add(gridHelper); */
     const axesHelper = new THREE.AxesHelper(10);
     scene.add(axesHelper);
     const helper = new THREE.CameraHelper(orthographicCamera);
     scene.add(helper);
     helper.matrixWorldNeedsUpdate = true;
     helper.update();
-    helper.position.copy(orthographicCamera.position);
-    helper.rotation.copy(orthographicCamera.rotation);
+    /* helper.position.copy(orthographicCamera.position);
+    helper.rotation.copy(orthographicCamera.rotation); */
     /* console.log(helper.position); */
 
     // LIGHTS
@@ -161,13 +167,8 @@ function Canvas() {
 
     // CONTROLS
     //Create a closed wavey loop
-    const lerp = {
-      current: 0,
-      target: 0,
-      ease: 0.1,
-    };
 
-    const curve = new THREE.CatmullRomCurve3(
+    /* const curve = new THREE.CatmullRomCurve3(
       [
         new THREE.Vector3(-5, 0, 0),
         new THREE.Vector3(0, 0, -5),
@@ -180,65 +181,11 @@ function Canvas() {
     const points = curve.getPoints(50);
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
-    const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    const material = new THREE.LineBasicMaterial({ color: 0xff0000 }); */
 
     // Create the final object to add to the scene
     let progress = 0;
-    const curvePath = () => {
-      const dummyCurve = new THREE.Vector3(0, 0, 0);
-      const position = new THREE.Vector3(0, 0, 0);
-      const lookAtPosition = new THREE.Vector3(0, 0, 0);
-      const directionalVector = new THREE.Vector3(0, 0, 0);
-      const staticVector = new THREE.Vector3(0, 1, 0);
-      const crossVector = new THREE.Vector3(0, 1, 0);
-
-      lerp.current = GSAP.utils.interpolate(
-        lerp.current,
-        lerp.target,
-        lerp.ease
-      );
-
-      curve.getPointAt(lerp.current % 1, position);
-      orthographicCamera.position.copy(position);
-
-      directionalVector.subVectors(
-        curve.getPointAt((lerp.current % 1) + 0.000001),
-        position
-      );
-      directionalVector.normalize();
-      crossVector.crossVectors(directionalVector, staticVector);
-      orthographicCamera.lookAt(crossVector);
-
-      /* const curveObject = new THREE.Line(geometry, material);
-      scene.add(curveObject); */
-
-      /* curve.getPointAt(lerp.current, position); */
-
-      /*  orthographicCamera.position.copy(position); */
-
-      requestAnimationFrame(curvePath);
-    };
-
-    const onWheel = () => {
-      window.addEventListener("wheel", (e) => {
-        if (e.deltaY > 0) {
-          lerp.target += 0.01;
-          /* back = false; */
-        } else {
-          lerp.target -= 0.01;
-          /* back = true; */
-        }
-        /* if (back) {
-          lerp.target -= 0.001;
-        } else {
-          lerp.target += 0.001;
-        } */
-      });
-    };
-
-    onWheel();
-
-    curvePath();
+    lerp.current = GSAP.utils.interpolate(lerp.current, lerp.target, lerp.ease);
 
     let start = Date.now();
     let current = start;
@@ -281,24 +228,38 @@ function Canvas() {
           });
         }
       });
-      /* actualRoom.rotation.y = Math.PI * 2; */
+      window.addEventListener("mousemove", (e) => {
+        let rotation =
+          ((e.clientX - window.innerWidth / 2) * 2) / window.innerWidth;
+        lerp.target = rotation * 0.1;
+        /* console.log(lerp.target); */
+        /* console.log(lerp.target); */
+        lerp.current = GSAP.utils.interpolate(
+          lerp.current,
+          lerp.target,
+          lerp.ease
+        );
+        actualRoom.rotation.y = lerp.current;
+      });
     }
 
-    /* const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material); */
-    /* scene.add(cube); */
+    // FLOOR
+    const geometry = new THREE.PlaneGeometry(100, 100);
+    const planeMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      side: THREE.BackSide,
+    });
+    const plane = new THREE.Mesh(geometry, planeMaterial);
+    plane.rotation.x = Math.PI / 2;
+    plane.position.y = -0.3;
+    plane.receiveShadow = true;
+    scene.add(plane);
 
     const animate = () => {
       let currentTime = Date.now();
       delta = currentTime - current;
       current = currentTime;
       elapsed = current - start;
-
-      /* console.log("start");
-      console.log(delta); */
-
-      /* console.log(current); */
 
       // fix fish animation
       if (Object.keys(room).length !== 0) {
@@ -309,7 +270,25 @@ function Canvas() {
       }
 
       requestAnimationFrame(animate);
+      renderer.setViewport(0, 0, innerWidth, innerHeight);
+      renderer.render(scene, orthographicCamera);
+
+      // SECOND SCREEN
+      /* renderer.setScissorTest(true);
+      renderer.setViewport(
+        innerWidth - innerWidth / 3,
+        innerHeight - innerHeight / 3,
+        innerWidth / 3,
+        innerHeight / 3
+      );
+      renderer.setScissor(
+        innerWidth - innerWidth / 3,
+        innerHeight - innerHeight / 3,
+        innerWidth / 3,
+        innerHeight / 3
+      );
       renderer.render(scene, perspectiveCamera);
+      renderer.setScissorTest(false); */
     };
 
     let onWindowResize = function () {
@@ -334,14 +313,6 @@ function Canvas() {
 
     return () => experienceRef.current.removeChild(renderer.domElement);
   }, [ready /* , room */]);
-
-  /* useEffect(() => {
-    if (ready === true) {
-      const room = items.room;
-      const actualRoom = room.scene;
-      scene.add(actualRoom);
-    }
-  }, [ready]); */
 
   return <div className="experience" ref={experienceRef}></div>;
 }
