@@ -70,8 +70,6 @@ function Canvas() {
       loaded++;
 
       if (loaded === queue) {
-        /* console.log("first ran"); */
-        /* emit("ready"); */
         setItems(items);
         setReady(true);
       }
@@ -297,8 +295,8 @@ function Canvas() {
         ((-window.innerWidth / window.innerHeight) * frustrum) / 2;
       orthographicCamera.right =
         ((window.innerWidth / window.innerHeight) * frustrum) / 2;
-      orthographicCamera.left = frustrum / 2;
-      orthographicCamera.left = -frustrum / 2;
+      orthographicCamera.top = frustrum / 2;
+      orthographicCamera.bottom = -frustrum / 2;
       perspectiveCamera.updateProjectionMatrix();
       orthographicCamera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
