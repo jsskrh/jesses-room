@@ -8,15 +8,10 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import GSAP from "gsap";
 
 function Canvas() {
-  /* var events = require("events"); */
-  /* const EventEmitter = require("events");
-  const eventEmitter = new EventEmitter(); */
-
   const [items, setItems] = useState({});
   const [actualRoom, setActualRoom] = useState({});
   const [room, setRoom] = useState({});
   const [ready, setReady] = useState(false);
-  /* const [progress, setProgress] = useState(0); */
 
   const experienceRef = useRef(null);
   const experience = experienceRef.current;
@@ -79,119 +74,113 @@ function Canvas() {
     startLoading();
   }, []);
 
+  /* useEffect(() => {
+    renderer.setViewport(0, 0, innerWidth, innerHeight);
+    renderer.render(scene, orthographicCamera);
+  }, [ready]); */
+
   useEffect(() => {
-    const lerp = {
-      current: 0,
-      target: 0,
-      ease: 0.1,
-    };
+    if (ready) {
+      const lerp = {
+        current: 0,
+        target: 0,
+        ease: 0.1,
+      };
 
-    // RENDERER
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-    });
-    renderer.physicallyCorrectLights = true;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.CineonToneMapping;
-    renderer.toneMappingExposure = 1.75;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    experienceRef.current.appendChild(renderer.domElement);
+      // RENDERER
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+      });
+      renderer.physicallyCorrectLights = true;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.CineonToneMapping;
+      renderer.toneMappingExposure = 1.75;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      experienceRef.current.appendChild(renderer.domElement);
 
-    // SCENE
-    const scene = new THREE.Scene();
+      // SCENE
+      const scene = new THREE.Scene();
 
-    // CAMERA
-    const perspectiveCamera = new THREE.PerspectiveCamera(
-      35,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    scene.add(perspectiveCamera);
-    perspectiveCamera.position.x = 29;
-    perspectiveCamera.position.y = 14;
-    perspectiveCamera.position.z = 12;
-    const frustrum = 5;
-    const orthographicCamera = new THREE.OrthographicCamera(
-      ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
-      ((window.innerWidth / window.innerHeight) * frustrum) / 2,
-      frustrum / 2,
-      -frustrum / 2,
-      -50,
-      50
-    );
+      // CAMERA
+      const perspectiveCamera = new THREE.PerspectiveCamera(
+        35,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      scene.add(perspectiveCamera);
+      perspectiveCamera.position.x = 29;
+      perspectiveCamera.position.y = 14;
+      perspectiveCamera.position.z = 12;
+      const frustrum = 5;
+      const orthographicCamera = new THREE.OrthographicCamera(
+        ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
+        ((window.innerWidth / window.innerHeight) * frustrum) / 2,
+        frustrum / 2,
+        -frustrum / 2,
+        -50,
+        50
+      );
 
-    orthographicCamera.position.y = 4;
-    orthographicCamera.position.z = 5;
-    orthographicCamera.rotation.x = -Math.PI / 6;
+      orthographicCamera.position.y = 4;
+      orthographicCamera.position.z = 5;
+      orthographicCamera.rotation.x = -Math.PI / 6;
 
-    scene.add(orthographicCamera);
-    console.log(orthographicCamera);
+      scene.add(orthographicCamera);
 
-    // HELPERS
-    const size = 20;
-    const divisions = 20;
-    /* const gridHelper = new THREE.GridHelper(size, divisions);
-    scene.add(gridHelper); */
-    const axesHelper = new THREE.AxesHelper(10);
-    scene.add(axesHelper);
-    const helper = new THREE.CameraHelper(orthographicCamera);
-    scene.add(helper);
-    helper.matrixWorldNeedsUpdate = true;
-    helper.update();
-    /* helper.position.copy(orthographicCamera.position);
-    helper.rotation.copy(orthographicCamera.rotation); */
-    /* console.log(helper.position); */
+      // HELPERS
+      //const size = 20;
+      //const divisions = 20;
+      //const gridHelper = new THREE.GridHelper(size, divisions);
+      //scene.add(gridHelper);
+      //const axesHelper = new THREE.AxesHelper(10);
+      //scene.add(axesHelper);
+      //const helper = new THREE.CameraHelper(orthographicCamera);
+      //scene.add(helper);
+      //helper.matrixWorldNeedsUpdate = true;
+      //helper.update();
+      //helper.position.copy(orthographicCamera.position);
+      //helper.rotation.copy(orthographicCamera.rotation);
+      //console.log(helper.position);
 
-    // LIGHTS
-    const sunLight = new THREE.DirectionalLight("#ffffff", 3);
-    sunLight.castShadow = true;
-    sunLight.shadow.camera.far = 20;
-    sunLight.shadow.mapSize.set(2048, 2048);
-    sunLight.shadow.normalBias = 0.05;
-    sunLight.position.set(-1.5, 7, 3);
-    scene.add(sunLight);
-    /* sunLight.shadow.camera.far=set(x:number, y:number,z:number):THREE.Vector3 */
-    const ambientLight = new THREE.AmbientLight("#ffffff", 1);
-    scene.add(ambientLight);
+      // LIGHTS
+      const sunLight = new THREE.DirectionalLight("#ffffff", 3);
+      sunLight.castShadow = true;
+      sunLight.shadow.camera.far = 20;
+      sunLight.shadow.mapSize.set(2048, 2048);
+      sunLight.shadow.normalBias = 0.05;
+      sunLight.position.set(-1.5, 7, 3);
+      scene.add(sunLight);
+      const ambientLight = new THREE.AmbientLight("#ffffff", 1);
+      scene.add(ambientLight);
 
-    // ORBIT CONTROLS
-    const controls = new OrbitControls(perspectiveCamera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.enableZoom = false;
+      // ORBIT CONTROLS
+      const controls = new OrbitControls(
+        perspectiveCamera,
+        renderer.domElement
+      );
+      controls.enableDamping = true;
+      controls.enableZoom = false;
 
-    // CONTROLS
-    //Create a closed wavey loop
+      // CONTROLS
+      //Create a closed wavey loop
+      // Create the final object to add to the scene
+      let progress = 0;
+      lerp.current = GSAP.utils.interpolate(
+        lerp.current,
+        lerp.target,
+        lerp.ease
+      );
 
-    /* const curve = new THREE.CatmullRomCurve3(
-      [
-        new THREE.Vector3(-5, 0, 0),
-        new THREE.Vector3(0, 0, -5),
-        new THREE.Vector3(5, 0, 0),
-        new THREE.Vector3(0, 0, 5),
-      ],
-      true
-    );
+      let start = Date.now();
+      let current = start;
+      let elapsed = 0;
+      let delta = 16;
 
-    const points = curve.getPoints(50);
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-    const material = new THREE.LineBasicMaterial({ color: 0xff0000 }); */
-
-    // Create the final object to add to the scene
-    let progress = 0;
-    lerp.current = GSAP.utils.interpolate(lerp.current, lerp.target, lerp.ease);
-
-    let start = Date.now();
-    let current = start;
-    let elapsed = 0;
-    let delta = 16;
-
-    // ROOM
-    if (ready === true) {
+      // ROOM
       const room = items.room;
       setRoom(room);
       const actualRoom = room.scene;
@@ -209,7 +198,6 @@ function Canvas() {
           });
         }
 
-        // unhide aqua glass in blender
         if (child.name === "AquaGlass") {
           child.material = new THREE.MeshPhysicalMaterial();
           child.material.roughness = 0;
@@ -219,7 +207,6 @@ function Canvas() {
           child.material.opacity = 1;
         }
 
-        // flip screen in blender
         if (child.name === "Screen") {
           child.material = new THREE.MeshBasicMaterial({
             map: items.screen,
@@ -230,8 +217,6 @@ function Canvas() {
         let rotation =
           ((e.clientX - window.innerWidth / 2) * 2) / window.innerWidth;
         lerp.target = rotation * 0.1;
-        /* console.log(lerp.target); */
-        /* console.log(lerp.target); */
         lerp.current = GSAP.utils.interpolate(
           lerp.current,
           lerp.target,
@@ -239,78 +224,69 @@ function Canvas() {
         );
         actualRoom.rotation.y = lerp.current;
       });
-    }
+      console.log(room);
 
-    // FLOOR
-    const geometry = new THREE.PlaneGeometry(100, 100);
-    const planeMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      side: THREE.BackSide,
-    });
-    const plane = new THREE.Mesh(geometry, planeMaterial);
-    plane.rotation.x = Math.PI / 2;
-    plane.position.y = -0.3;
-    plane.receiveShadow = true;
-    scene.add(plane);
-
-    const animate = () => {
-      let currentTime = Date.now();
-      delta = currentTime - current;
-      current = currentTime;
-      elapsed = current - start;
-
+      // FISH
       // fix fish animation
-      if (Object.keys(room).length !== 0) {
+      /* if (Object.keys(room).length !== 0) {
         const mixer = new THREE.AnimationMixer(actualRoom);
-        const swim = mixer.clipAction(room.animations[155]);
+        const swim = mixer.clipAction(room.animations[156]);
         swim.play();
         mixer.update(delta * 0.009);
-      }
+      } */
+      /* const mixer = new THREE.AnimationMixer(actualRoom);
+      const swim = mixer.clipAction(room.animations[156]);
+      swim.play();
+      mixer.update(delta * 0.009); */
 
-      requestAnimationFrame(animate);
-      renderer.setViewport(0, 0, innerWidth, innerHeight);
-      renderer.render(scene, orthographicCamera);
+      // FLOOR
+      const planeGeometry = new THREE.PlaneGeometry(100, 100);
+      const planeMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        side: THREE.BackSide,
+      });
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.rotation.x = Math.PI / 2;
+      plane.position.y = -0.3;
+      plane.receiveShadow = true;
+      scene.add(plane);
 
-      // SECOND SCREEN
-      /* renderer.setScissorTest(true);
-      renderer.setViewport(
-        innerWidth - innerWidth / 3,
-        innerHeight - innerHeight / 3,
-        innerWidth / 3,
-        innerHeight / 3
-      );
-      renderer.setScissor(
-        innerWidth - innerWidth / 3,
-        innerHeight - innerHeight / 3,
-        innerWidth / 3,
-        innerHeight / 3
-      );
-      renderer.render(scene, perspectiveCamera);
-      renderer.setScissorTest(false); */
-    };
+      // ANIMATE
+      var animate = function () {
+        requestAnimationFrame(animate);
+        /* if (Object.keys(room).length !== 0) {
+          const mixer = new THREE.AnimationMixer(actualRoom);
+          const swim = mixer.clipAction(room.animations[156]);
+          swim.play();
+          mixer.update(delta * 0.009);
+        } */
+        /* const mixer = new THREE.AnimationMixer(actualRoom);
+        const swim = mixer.clipAction(room.animations[156]);
+        swim.play();
+        mixer.update(delta * 0.009); */
+        renderer.render(scene, orthographicCamera);
+      };
 
-    let onWindowResize = function () {
-      perspectiveCamera.aspect = window.innerWidth / window.innerHeight;
-      orthographicCamera.left =
-        ((-window.innerWidth / window.innerHeight) * frustrum) / 2;
-      orthographicCamera.right =
-        ((window.innerWidth / window.innerHeight) * frustrum) / 2;
-      orthographicCamera.top = frustrum / 2;
-      orthographicCamera.bottom = -frustrum / 2;
-      perspectiveCamera.updateProjectionMatrix();
-      orthographicCamera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    };
+      let onWindowResize = function () {
+        orthographicCamera.left =
+          ((-window.innerWidth / window.innerHeight) * frustrum) / 2;
+        orthographicCamera.right =
+          ((window.innerWidth / window.innerHeight) * frustrum) / 2;
+        orthographicCamera.top = frustrum / 2;
+        orthographicCamera.bottom = -frustrum / 2;
+        perspectiveCamera.updateProjectionMatrix();
+        orthographicCamera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      };
 
-    window.addEventListener("resize", onWindowResize, false);
+      window.addEventListener("resize", onWindowResize, false);
 
-    animate();
+      animate();
 
-    /* console.log(room.animations); */
-
-    return () => experienceRef.current.removeChild(renderer.domElement);
-  }, [ready /* , room */]);
+      return () => experienceRef.current.removeChild(renderer.domElement);
+    }
+  }, [ready]);
 
   return <div className="experience" ref={experienceRef}></div>;
 }
