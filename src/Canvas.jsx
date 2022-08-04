@@ -242,7 +242,7 @@ function Canvas() {
       // FLOOR
       const planeGeometry = new THREE.PlaneGeometry(100, 100);
       const planeMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
+        color: 0xffffff /* 6e85b7 */,
         side: THREE.BackSide,
       });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);

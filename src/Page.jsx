@@ -1,0 +1,65 @@
+import React from "react";
+import "./Page.css";
+
+function Page() {
+  return (
+    <div className="page">
+      <div className="page-wrapper">
+        <section className="hero">
+          <div className="hero-wrapper">
+            <div className="hero-main hero-bottom">
+              <h1 className="hero-main-title">Jesse K. Akorah</h1>
+              <p className="hero-main-description">Fullstack Developer</p>
+            </div>
+
+            <div className="hero-main hero-top">
+              <p className="hero-main-subheading">Jesse's Room</p>
+              <p className="hero-main-subheading">Portfolio</p>
+            </div>
+          </div>
+        </section>
+
+        <div className="section-margin"></div>
+
+        <section className="about-section section left">
+          <div className="section-header">
+            <div className="header-top">
+              <span className="section-title-text">About</span>
+              <div className="section-title-decoration bar-one"></div>
+              <div className="section-title-decoration bar-two"></div>
+              <div className="section-title-decoration bar-three"></div>
+            </div>
+            <span className="section-number">01</span>
+          </div>
+          <div className="section-content">
+            <div className="section-text">
+              <h3 className="text-head">Lorem Ipsum</h3>
+              <p className="text">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                Dignissimos dolor consectetur in a natus quidem quos eius cum
+                alias vero porro, repellat vel at voluptate numquam dolorem ipsa
+                cumque accusamus.
+              </p>
+              <h3 className="text-head">Lorem Ipsum</h3>
+              <p className="text">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                Dignissimos dolor consectetur in a natus quidem quos eius cum
+                alias vero porro, repellat vel at voluptate numquam dolorem ipsa
+                cumque accusamus.
+              </p>
+              <h3 className="text-head">Lorem Ipsum</h3>
+              <p className="text">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                Dignissimos dolor consectetur in a natus quidem quos eius cum
+                alias vero porro, repellat vel at voluptate numquam dolorem ipsa
+                cumque accusamus.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+export default Page;
