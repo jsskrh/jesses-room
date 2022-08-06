@@ -4,11 +4,73 @@ import "./Canvas.css";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import GSAP from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
+import { useStateValue } from "./StateProvider";
+import GUI from "lil-gui";
+import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 
-function Canvas({ ready, items, childMargin }) {
+function Canvas({ ready, items }) {
+  const [{ theme }] = useStateValue();
+
   const [actualRoom, setActualRoom] = useState({});
 
   const experienceRef = useRef(null);
+
+  const themeRef = useRef(theme);
+  /* themeRef.current = theme; */
+
+  useEffect(() => {
+    themeRef.current = theme;
+    console.log(themeRef.current, "effect 1");
+  });
+
+  /* useEffect(() => {
+    // LIGHTS
+    const sunLight = new THREE.DirectionalLight("#ffffff", 3);
+    sunLight.castShadow = true;
+    sunLight.shadow.camera.far = 20;
+    sunLight.shadow.mapSize.set(2048, 2048);
+    sunLight.shadow.normalBias = 0.05;
+    sunLight.position.set(-1.5, 7, 3);
+    scene.add(sunLight);
+    const ambientLight = new THREE.AmbientLight("#ffffff", 1);
+    scene.add(ambientLight);
+    
+    if (theme) {
+      GSAP.to(sunLight.color, {
+        r: 0.17254901960784313,
+        g: 0.23137254901960785,
+        b: 0.6862745098039216,
+      });
+      GSAP.to(ambientLight.color, {
+        r: 0.17254901960784313,
+        g: 0.23137254901960785,
+        b: 0.6862745098039216,
+      });
+      GSAP.to(sunLight, {
+        intensity: 0.78,
+      });
+      GSAP.to(ambientLight, {
+        intensity: 0.78,
+      });
+    } else {
+      GSAP.to(sunLight.color, {
+        r: 1,
+        g: 1,
+        b: 1,
+      });
+      GSAP.to(ambientLight.color, {
+        r: 1,
+        g: 1,
+        b: 1,
+      });
+      GSAP.to(sunLight, {
+        intensity: 3,
+      });
+      GSAP.to(ambientLight, {
+        intensity: 1,
+      });
+    }
+  }, [ready, theme]); */
 
   useEffect(() => {
     if (ready) {
@@ -16,6 +78,13 @@ function Canvas({ ready, items, childMargin }) {
         current: 0,
         target: 0,
         ease: 0.1,
+      };
+
+      /* const gui = new GUI({ container: document.querySelector(".hero-main") }); */
+
+      const obj = {
+        colorObj: { r: 0, g: 0, b: 0 },
+        intensity: 3,
       };
 
       // RENDERER
@@ -34,6 +103,65 @@ function Canvas({ ready, items, childMargin }) {
 
       // SCENE
       const scene = new THREE.Scene();
+
+      // LIGHTS
+      const sunLight = new THREE.DirectionalLight("#ffffff", 3);
+      sunLight.castShadow = true;
+      sunLight.shadow.camera.far = 20;
+      sunLight.shadow.mapSize.set(2048, 2048);
+      sunLight.shadow.normalBias = 0.05;
+      sunLight.position.set(-1.5, 7, 3);
+      scene.add(sunLight);
+      const ambientLight = new THREE.AmbientLight("#ffffff", 1);
+      scene.add(ambientLight);
+
+      /* gui.addColor(obj, "colorObj").onChange(() => {
+sunLight.color.copy(obj.colorObj);
+ambientLight.color.color(obj.colorObj);
+console.log(obj.colorObj);
+});
+
+gui.add(obj, "intensity", 0, 10).onChange(() => {
+sunLight.intesity = obj.intesity;
+}); */
+
+      if (themeRef.current) {
+        console.log(true);
+        GSAP.to(sunLight.color, {
+          r: 0.17254901960784313,
+          g: 0.23137254901960785,
+          b: 0.6862745098039216,
+        });
+        GSAP.to(ambientLight.color, {
+          r: 0.17254901960784313,
+          g: 0.23137254901960785,
+          b: 0.6862745098039216,
+        });
+        GSAP.to(sunLight, {
+          intensity: 0.78,
+        });
+        GSAP.to(ambientLight, {
+          intensity: 0.78,
+        });
+      } else {
+        console.log(false);
+        GSAP.to(sunLight.color, {
+          r: 1,
+          g: 1,
+          b: 1,
+        });
+        GSAP.to(ambientLight.color, {
+          r: 1,
+          g: 1,
+          b: 1,
+        });
+        GSAP.to(sunLight, {
+          intensity: 3,
+        });
+        GSAP.to(ambientLight, {
+          intensity: 1,
+        });
+      }
 
       // CAMERA
       const perspectiveCamera = new THREE.PerspectiveCamera(
@@ -76,17 +204,6 @@ function Canvas({ ready, items, childMargin }) {
       //helper.position.copy(orthographicCamera.position);
       //helper.rotation.copy(orthographicCamera.rotation);
       //console.log(helper.position);
-
-      // LIGHTS
-      const sunLight = new THREE.DirectionalLight("#ffffff", 3);
-      sunLight.castShadow = true;
-      sunLight.shadow.camera.far = 20;
-      sunLight.shadow.mapSize.set(2048, 2048);
-      sunLight.shadow.normalBias = 0.05;
-      sunLight.position.set(-1.5, 7, 3);
-      scene.add(sunLight);
-      const ambientLight = new THREE.AmbientLight("#ffffff", 1);
-      scene.add(ambientLight);
 
       // ORBIT CONTROLS
       const controls = new OrbitControls(
@@ -189,6 +306,28 @@ function Canvas({ ready, items, childMargin }) {
       const swim = mixer.clipAction(room.animations[156]);
       swim.play();
       mixer.update(delta * 0.009); */
+
+      // RECTAREA LIGHT
+      const monitorLight = new THREE.RectAreaLight(0xffffff, 1, 0.73, 0.3515);
+      monitorLight.position.set(-9.56, 7.3, -2.8);
+      monitorLight.rotation.y = /* -46.4492 */ (Math.PI / 4) * 5;
+      if (themeRef.current) {
+        actualRoom.add(monitorLight);
+      }
+
+      /* const rectLightHelper = new RectAreaLightHelper(rectLight);
+      rectLight.add(rectLightHelper); */
+
+      const tankLight = new THREE.RectAreaLight(0xffffff, 1, 0.5, 1.015);
+      tankLight.position.set(9.08244, 7.2, -0.510353);
+      tankLight.rotation.x = /* -46.4492 */ -Math.PI / 2;
+      tankLight.rotation.z = /* -46.4492 */ Math.PI / 4;
+      if (themeRef.current) {
+        actualRoom.add(tankLight);
+      }
+
+      /* const rectLightHelper = new RectAreaLightHelper(tankLight);
+      tankLight.add(rectLightHelper); */
 
       // FLOOR
       const planeGeometry = new THREE.PlaneGeometry(100, 100);

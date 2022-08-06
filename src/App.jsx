@@ -6,8 +6,11 @@ import assets from "./assets";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import * as THREE from "three";
+import { useStateValue } from "./StateProvider";
 
 function App() {
+  const [{}, dispatch] = useStateValue();
+
   const [items, setItems] = useState({});
   const [ready, setReady] = useState(false);
 
