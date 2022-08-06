@@ -9,7 +9,7 @@ import * as THREE from "three";
 import { useStateValue } from "./StateProvider";
 
 function App() {
-  const [{}, dispatch] = useStateValue();
+  const [{ theme }, dispatch] = useStateValue();
 
   const [items, setItems] = useState({});
   const [ready, setReady] = useState(false);
@@ -73,7 +73,7 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
+    <div className={theme ? "App dark-theme" : "App light-theme"}>
       <Canvas ready={ready} items={items} />
       {ready && <Page />}
     </div>

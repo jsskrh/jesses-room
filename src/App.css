@@ -4,16 +4,65 @@ html,
 body {
   font-family: "Montserrat", sans-serif;
   font-size: 16px;
-  color: var(--element-black);
+  color: var(--color-light-text);
   letter-spacing: 0.15em;
+  background-color: var(--color-light-bg);
+}
+
+.App {
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+h1,
+section,
+p,
+span,
+svg {
+  transition: color 0.5s, background-color 0.5s;
 }
 
 :root {
-  --element-black: #323232;
+  --color-black: #323232;
+  --color-green: #7bd0ad;
+  --color-blue: #95abe5;
+  --color-brown: #99664a;
+  --color-cream: #fbf4e4;
+  --color-purple: #6b5b8c;
+  --color-navy: #8295cc;
+  --color-pink: #db929d;
+
+  /* LIGHT MODE */
+  --color-light-bg: var(--color-cream);
+  --color-light-base: var(--color-cream);
+  --color-primary: var(--color-pink);
+  --color-light-text: var(--color-black);
+
+  /* DARK MODE */
+  --color-dark-bg: var(--color-navy);
+  --color-dark-base: var(--color-navy);
+  --color-dark-text: var(--color-cream);
+  --final-section: var(--color-purple);
+
   --element-grey: #db929d;
   --element-blue: #95abe5;
   --element-cream: #fbf4e4;
   --element-secondary: #d4dbe3;
   --element-primary: #fefbe7;
   --element-test: rgb(254, 251, 231);
+}
+
+.light-theme {
+  --color-bg: var(--color-light-bg);
+  --color-base: var(--color-cream);
+  --color-text: var(--color-light-text);
+  --section-bg: var(--color-cream);
+}
+
+.dark-theme {
+  --color-bg: var(--color-dark-bg);
+  --color-text: var(--color-dark-text);
+  --section-bg: var(--color-navy);
+  --color-primary: var(--color-cream);
+  --color-base: var(--color-navy);
 }

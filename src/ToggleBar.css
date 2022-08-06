@@ -28,8 +28,8 @@
   margin: 0 16px;
   border-radius: 999px;
   border: none;
-  background-color: var(--element-grey);
-  box-shadow: 0 0 6pxrgba (var(--color-base-rgb), 0.2);
+  background-color: var(--color-primary);
+  box-shadow: 0 0 6px rgba(var(--color-black), 0.2);
 }
 
 .toggle-button:hover .toggle-circle {
@@ -42,7 +42,7 @@
   border-radius: 50%;
   width: 20px;
   height: 20px;
-  background-color: var(--element-primary);
+  background-color: var(--color-base);
   transition: all 0.2s ease-in-out;
 }
 

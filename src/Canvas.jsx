@@ -80,7 +80,7 @@ function Canvas({ ready, items }) {
         ease: 0.1,
       };
 
-      /* const gui = new GUI({ container: document.querySelector(".hero-main") }); */
+      const gui = new GUI({ container: document.querySelector(".hero-main") });
 
       const obj = {
         colorObj: { r: 0, g: 0, b: 0 },
@@ -114,16 +114,6 @@ function Canvas({ ready, items }) {
       scene.add(sunLight);
       const ambientLight = new THREE.AmbientLight("#ffffff", 1);
       scene.add(ambientLight);
-
-      /* gui.addColor(obj, "colorObj").onChange(() => {
-sunLight.color.copy(obj.colorObj);
-ambientLight.color.color(obj.colorObj);
-console.log(obj.colorObj);
-});
-
-gui.add(obj, "intensity", 0, 10).onChange(() => {
-sunLight.intesity = obj.intesity;
-}); */
 
       if (themeRef.current) {
         console.log(true);
@@ -276,11 +266,8 @@ sunLight.intesity = obj.intesity;
 
       GSAP.registerPlugin(ScrollTrigger);
 
-      // fix scroll trigger
-
       const timeline = new GSAP.timeline();
       timeline.to(actualRoom.position, {
-        /* x: 2.35, */
         x: () => {
           return innerWidth * 0.00165;
         },
@@ -310,7 +297,7 @@ sunLight.intesity = obj.intesity;
       // RECTAREA LIGHT
       const monitorLight = new THREE.RectAreaLight(0xffffff, 1, 0.73, 0.3515);
       monitorLight.position.set(-9.56, 7.3, -2.8);
-      monitorLight.rotation.y = /* -46.4492 */ (Math.PI / 4) * 5;
+      monitorLight.rotation.y = (Math.PI / 4) * 5;
       if (themeRef.current) {
         actualRoom.add(monitorLight);
       }
@@ -320,8 +307,8 @@ sunLight.intesity = obj.intesity;
 
       const tankLight = new THREE.RectAreaLight(0xffffff, 1, 0.5, 1.015);
       tankLight.position.set(9.08244, 7.2, -0.510353);
-      tankLight.rotation.x = /* -46.4492 */ -Math.PI / 2;
-      tankLight.rotation.z = /* -46.4492 */ Math.PI / 4;
+      tankLight.rotation.x = -Math.PI / 2;
+      tankLight.rotation.z = Math.PI / 4;
       if (themeRef.current) {
         actualRoom.add(tankLight);
       }
@@ -329,18 +316,29 @@ sunLight.intesity = obj.intesity;
       /* const rectLightHelper = new RectAreaLightHelper(tankLight);
       tankLight.add(rectLightHelper); */
 
+      /* gui.add(obj, "intensity", 0, 10).onChange(() => {
+sunLight.intesity = obj.intesity;
+}); */
+
       // FLOOR
       const planeGeometry = new THREE.PlaneGeometry(100, 100);
       const planeMaterial = new THREE.MeshStandardMaterial({
+        color: 0xfbf4e4,
         /* color: 0x6e85b7, */
-        color: 0xfefbe7,
+        /* color: 0xfefbe7, */
         side: THREE.BackSide,
       });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = Math.PI / 2;
       plane.position.y = -0.3;
+      /* plane.material.color.setHex(0xfbf4e4); */
       plane.receiveShadow = true;
       scene.add(plane);
+
+      gui.addColor(obj, "colorObj").onChange(() => {
+        plane.material.color.copy(obj.colorObj);
+        console.log(obj.colorObj);
+      });
 
       // ANIMATE
       var animate = function () {
