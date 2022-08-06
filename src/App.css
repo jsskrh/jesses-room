@@ -13,5 +13,7 @@ body {
   --element-grey: #db929d;
   --element-blue: #95abe5;
   --element-cream: #fbf4e4;
-  --element-green: #fefbe7;
+  --element-secondary: #d4dbe3;
+  --element-primary: #fefbe7;
+  --element-test: rgb(254, 251, 231);
 }

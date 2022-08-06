@@ -1,83 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import "./Canvas.css";
-import assets from "./assets";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import GSAP from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
-function Canvas() {
-  const [items, setItems] = useState({});
+function Canvas({ ready, items, childMargin }) {
   const [actualRoom, setActualRoom] = useState({});
-  const [room, setRoom] = useState({});
-  const [ready, setReady] = useState(false);
 
   const experienceRef = useRef(null);
-  const experience = experienceRef.current;
-
-  useEffect(() => {
-    const queue = assets.length;
-    let items = {};
-    let loaded = 0;
-    let loaders = {};
-
-    const setLoaders = () => {
-      loaders.gltfLoader = new GLTFLoader();
-      loaders.dracoLoader = new DRACOLoader();
-      loaders.dracoLoader.setDecoderPath(
-        "/node_modules/three/examples/js/libs/draco/"
-      );
-      loaders.gltfLoader.setDRACOLoader(loaders.dracoLoader);
-    };
-
-    const startLoading = () => {
-      for (const asset of assets) {
-        if (asset.type === "glbModel") {
-          loaders.gltfLoader.load(asset.path, (file) => {
-            singleAssetLoaded(asset, file);
-          });
-        } else if (asset.type === "videoTexture") {
-          let video = {};
-          let videoTexture = {};
-
-          video[asset.name] = document.createElement("video");
-          video[asset.name].src = asset.path;
-          video[asset.name].muted = true;
-          video[asset.name].playsInline = true;
-          video[asset.name].autoplay = true;
-          video[asset.name].loop = true;
-          video[asset.name].play();
-
-          videoTexture[asset.name] = new THREE.VideoTexture(video[asset.name]);
-          videoTexture[asset.name].flipY = true;
-          videoTexture[asset.name].minFilter = THREE.NearestFilter;
-          videoTexture[asset.name].magFilter = THREE.NearestFilter;
-          videoTexture[asset.name].generateMipMaps = false;
-          videoTexture[asset.name].encoding = THREE.sRGBEncoding;
-          singleAssetLoaded(asset, videoTexture[asset.name]);
-        }
-      }
-    };
-
-    const singleAssetLoaded = (asset, file) => {
-      items[asset.name] = file;
-      loaded++;
-
-      if (loaded === queue) {
-        setItems(items);
-        setReady(true);
-      }
-    };
-
-    setLoaders();
-    startLoading();
-  }, []);
-
-  /* useEffect(() => {
-    renderer.setViewport(0, 0, innerWidth, innerHeight);
-    renderer.render(scene, orthographicCamera);
-  }, [ready]); */
 
   useEffect(() => {
     if (ready) {
@@ -182,7 +113,7 @@ function Canvas() {
 
       // ROOM
       const room = items.room;
-      setRoom(room);
+      /* setRoom(room); */
       const actualRoom = room.scene;
       setActualRoom(actualRoom);
       scene.add(actualRoom);
@@ -226,6 +157,26 @@ function Canvas() {
       });
       console.log(room);
 
+      GSAP.registerPlugin(ScrollTrigger);
+
+      // fix scroll trigger
+
+      const timeline = new GSAP.timeline();
+      timeline.to(actualRoom.position, {
+        /* x: 2.35, */
+        x: () => {
+          return innerWidth * 0.00165;
+        },
+        scrollTrigger: {
+          trigger: ".first-margin",
+          markers: true,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.7,
+          invalidateOnRefresh: true,
+        },
+      });
+
       // FISH
       // fix fish animation
       /* if (Object.keys(room).length !== 0) {
@@ -242,7 +193,8 @@ function Canvas() {
       // FLOOR
       const planeGeometry = new THREE.PlaneGeometry(100, 100);
       const planeMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff /* 6e85b7 */,
+        /* color: 0x6e85b7, */
+        color: 0xfefbe7,
         side: THREE.BackSide,
       });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);

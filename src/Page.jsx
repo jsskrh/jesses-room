@@ -1,9 +1,11 @@
 import React from "react";
 import "./Page.css";
+import ToggleBar from "./ToggleBar";
 
 function Page() {
   return (
     <div className="page">
+      <ToggleBar />
       <div className="page-wrapper">
         <section className="hero">
           <div className="hero-wrapper">
@@ -19,7 +21,7 @@ function Page() {
           </div>
         </section>
 
-        <div className="section-margin"></div>
+        <div className="first-margin section-margin"></div>
 
         <section className="about-section section left">
           <div className="section-header">
