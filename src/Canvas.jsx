@@ -245,6 +245,17 @@ function Canvas({ ready, items }) {
           child.material.opacity = 1;
         }
 
+        // Fix lamp opacity
+        if (child.name === "Plane005") {
+          child.material = new THREE.MeshPhysicalMaterial();
+          child.material.roughness = 0;
+          child.material.color.set(0xffffff);
+          child.material.ior = 3;
+          child.material.transmission = 1;
+          child.material.transparency = true;
+          child.material.opacity = 0.5;
+        }
+
         if (child.name === "Screen") {
           child.material = new THREE.MeshBasicMaterial({
             map: items.screen,
@@ -315,6 +326,17 @@ function Canvas({ ready, items }) {
 
       /* const rectLightHelper = new RectAreaLightHelper(tankLight);
       tankLight.add(rectLightHelper); */
+
+      const lampLight = new THREE.RectAreaLight(0xffffff, 1, 0.1, 0.1);
+      lampLight.position.set(-8.72089, 1.215046, 13.5548);
+      lampLight.rotation.x = -Math.PI / 2;
+      lampLight.rotation.z = Math.PI / 4;
+      if (themeRef.current) {
+        actualRoom.add(lampLight);
+      }
+
+      /* const rectLightHelper = new RectAreaLightHelper(lampLight);
+      lampLight.add(rectLightHelper); */
 
       /* gui.add(obj, "intensity", 0, 10).onChange(() => {
 sunLight.intesity = obj.intesity;
