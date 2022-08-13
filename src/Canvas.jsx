@@ -16,61 +16,10 @@ function Canvas({ ready, items }) {
   const experienceRef = useRef(null);
 
   const themeRef = useRef(theme);
-  /* themeRef.current = theme; */
 
   useEffect(() => {
     themeRef.current = theme;
-    console.log(themeRef.current, "effect 1");
   });
-
-  /* useEffect(() => {
-    // LIGHTS
-    const sunLight = new THREE.DirectionalLight("#ffffff", 3);
-    sunLight.castShadow = true;
-    sunLight.shadow.camera.far = 20;
-    sunLight.shadow.mapSize.set(2048, 2048);
-    sunLight.shadow.normalBias = 0.05;
-    sunLight.position.set(-1.5, 7, 3);
-    scene.add(sunLight);
-    const ambientLight = new THREE.AmbientLight("#ffffff", 1);
-    scene.add(ambientLight);
-    
-    if (theme) {
-      GSAP.to(sunLight.color, {
-        r: 0.17254901960784313,
-        g: 0.23137254901960785,
-        b: 0.6862745098039216,
-      });
-      GSAP.to(ambientLight.color, {
-        r: 0.17254901960784313,
-        g: 0.23137254901960785,
-        b: 0.6862745098039216,
-      });
-      GSAP.to(sunLight, {
-        intensity: 0.78,
-      });
-      GSAP.to(ambientLight, {
-        intensity: 0.78,
-      });
-    } else {
-      GSAP.to(sunLight.color, {
-        r: 1,
-        g: 1,
-        b: 1,
-      });
-      GSAP.to(ambientLight.color, {
-        r: 1,
-        g: 1,
-        b: 1,
-      });
-      GSAP.to(sunLight, {
-        intensity: 3,
-      });
-      GSAP.to(ambientLight, {
-        intensity: 1,
-      });
-    }
-  }, [ready, theme]); */
 
   useEffect(() => {
     if (ready) {
@@ -80,12 +29,12 @@ function Canvas({ ready, items }) {
         ease: 0.1,
       };
 
-      const gui = new GUI({ container: document.querySelector(".hero-main") });
+      /* const gui = new GUI({ container: document.querySelector(".hero-main") }); */
 
-      const obj = {
+      /* const obj = {
         colorObj: { r: 0, g: 0, b: 0 },
         intensity: 3,
-      };
+      }; */
 
       // RENDERER
       const renderer = new THREE.WebGLRenderer({
@@ -114,44 +63,6 @@ function Canvas({ ready, items }) {
       scene.add(sunLight);
       const ambientLight = new THREE.AmbientLight("#ffffff", 1);
       scene.add(ambientLight);
-
-      if (themeRef.current) {
-        console.log(true);
-        GSAP.to(sunLight.color, {
-          r: 0.17254901960784313,
-          g: 0.23137254901960785,
-          b: 0.6862745098039216,
-        });
-        GSAP.to(ambientLight.color, {
-          r: 0.17254901960784313,
-          g: 0.23137254901960785,
-          b: 0.6862745098039216,
-        });
-        GSAP.to(sunLight, {
-          intensity: 0.78,
-        });
-        GSAP.to(ambientLight, {
-          intensity: 0.78,
-        });
-      } else {
-        console.log(false);
-        GSAP.to(sunLight.color, {
-          r: 1,
-          g: 1,
-          b: 1,
-        });
-        GSAP.to(ambientLight.color, {
-          r: 1,
-          g: 1,
-          b: 1,
-        });
-        GSAP.to(sunLight, {
-          intensity: 3,
-        });
-        GSAP.to(ambientLight, {
-          intensity: 1,
-        });
-      }
 
       // CAMERA
       const perspectiveCamera = new THREE.PerspectiveCamera(
@@ -220,7 +131,6 @@ function Canvas({ ready, items }) {
 
       // ROOM
       const room = items.room;
-      /* setRoom(room); */
       const actualRoom = room.scene;
       setActualRoom(actualRoom);
       scene.add(actualRoom);
@@ -306,34 +216,79 @@ function Canvas({ ready, items }) {
       mixer.update(delta * 0.009); */
 
       // RECTAREA LIGHT
-      const monitorLight = new THREE.RectAreaLight(0xffffff, 1, 0.73, 0.3515);
+      const monitorLight = new THREE.RectAreaLight(0xffffff, 0, 0.73, 0.3515);
       monitorLight.position.set(-9.56, 7.3, -2.8);
       monitorLight.rotation.y = (Math.PI / 4) * 5;
-      if (themeRef.current) {
-        actualRoom.add(monitorLight);
-      }
+      /* actualRoom.add(monitorLight); */
 
-      /* const rectLightHelper = new RectAreaLightHelper(rectLight);
-      rectLight.add(rectLightHelper); */
-
-      const tankLight = new THREE.RectAreaLight(0xffffff, 1, 0.5, 1.015);
+      const tankLight = new THREE.RectAreaLight(0xffffff, 0, 0.5, 1.015);
       tankLight.position.set(9.08244, 7.2, -0.510353);
       tankLight.rotation.x = -Math.PI / 2;
       tankLight.rotation.z = Math.PI / 4;
-      if (themeRef.current) {
-        actualRoom.add(tankLight);
-      }
+      //actualRoom.add(tankLight);
 
-      /* const rectLightHelper = new RectAreaLightHelper(tankLight);
-      tankLight.add(rectLightHelper); */
-
-      const lampLight = new THREE.RectAreaLight(0xffffff, 1, 0.1, 0.1);
+      const lampLight = new THREE.RectAreaLight(0xffffff, 0, 0.1, 0.1);
       lampLight.position.set(-8.72089, 1.215046, 13.5548);
       lampLight.rotation.x = -Math.PI / 2;
       lampLight.rotation.z = Math.PI / 4;
-      if (themeRef.current) {
-        actualRoom.add(lampLight);
-      }
+      //actualRoom.add(lampLight);
+
+      // DARK THEME
+      window.addEventListener("click", () => {
+        if (themeRef.current) {
+          GSAP.to(sunLight.color, {
+            r: 0.17254901960784313,
+            g: 0.23137254901960785,
+            b: 0.6862745098039216,
+          });
+          GSAP.to(ambientLight.color, {
+            r: 0.17254901960784313,
+            g: 0.23137254901960785,
+            b: 0.6862745098039216,
+          });
+          GSAP.to(sunLight, {
+            intensity: 0.78,
+          });
+          GSAP.to(ambientLight, {
+            intensity: 0.78,
+          });
+          /* GSAP.to(monitorLight, {
+            intensity: 1,
+          }); */
+          /* GSAP.to(tankLight, {
+            intensity: 1,
+          });
+          GSAP.to(lampLight, {
+            intensity: 1,
+          }); */
+        } else {
+          GSAP.to(sunLight.color, {
+            r: 1,
+            g: 1,
+            b: 1,
+          });
+          GSAP.to(ambientLight.color, {
+            r: 1,
+            g: 1,
+            b: 1,
+          });
+          GSAP.to(sunLight, {
+            intensity: 3,
+          });
+          GSAP.to(ambientLight, {
+            intensity: 1,
+          });
+          /* GSAP.to(monitorLight, {
+            intensity: 0,
+          }); */
+          /* GSAP.to(tankLight, {
+            intensity: 0,
+          });
+          GSAP.to(lampLight, {
+            intensity: 0,
+          }); */
+        }
+      });
 
       /* const rectLightHelper = new RectAreaLightHelper(lampLight);
       lampLight.add(rectLightHelper); */
@@ -341,26 +296,28 @@ function Canvas({ ready, items }) {
       /* gui.add(obj, "intensity", 0, 10).onChange(() => {
 sunLight.intesity = obj.intesity;
 }); */
+      /* const grid = new THREE.GridHelper(20, 20);
+      scene.add(grid); */
 
       // FLOOR
       const planeGeometry = new THREE.PlaneGeometry(100, 100);
       const planeMaterial = new THREE.MeshStandardMaterial({
         color: 0xfbf4e4,
         /* color: 0x6e85b7, */
-        /* color: 0xfefbe7, */
-        side: THREE.BackSide,
+        /* color: 0xffffff, */
+        side: THREE.DoubleSide,
       });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.rotation.x = Math.PI / 2;
-      plane.position.y = -0.3;
-      /* plane.material.color.setHex(0xfbf4e4); */
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.y = -0.5;
+      /* plane.material.color.setHex(0x000000); */
       plane.receiveShadow = true;
       scene.add(plane);
 
-      gui.addColor(obj, "colorObj").onChange(() => {
+      /* gui.addColor(obj, "colorObj").onChange(() => {
         plane.material.color.copy(obj.colorObj);
         console.log(obj.colorObj);
-      });
+      }); */
 
       // ANIMATE
       var animate = function () {
