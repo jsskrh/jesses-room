@@ -139,6 +139,8 @@ function Canvas({ ready, items }) {
         child.castShadow = true;
         child.receiveShadow = true;
 
+        console.log(child);
+
         if (child instanceof THREE.Group) {
           child.children.forEach((groupChild) => {
             groupChild.castShadow = true;
@@ -146,16 +148,18 @@ function Canvas({ ready, items }) {
           });
         }
 
-        if (child.name === "AquaGlass") {
-          child.material = new THREE.MeshPhysicalMaterial();
-          child.material.roughness = 0;
-          child.material.color.set(0x549dd2);
-          child.material.ior = 3;
-          child.material.transmission = 1;
-          child.material.opacity = 1;
+        if (child.name === "Aquarium") {
+          let aquaGlass = child.children[0];
+          aquaGlass.material = new THREE.MeshPhysicalMaterial();
+          aquaGlass.material.roughness = 0;
+          aquaGlass.material.color.set(0x549dd2);
+          aquaGlass.material.ior = 3;
+          aquaGlass.material.transmission = 1;
+          aquaGlass.material.opacity = 1;
         }
 
         // Fix lamp opacity
+        // Separate lamp and light
         if (child.name === "Plane005") {
           child.material = new THREE.MeshPhysicalMaterial();
           child.material.roughness = 0;
@@ -166,8 +170,9 @@ function Canvas({ ready, items }) {
           child.material.opacity = 0.5;
         }
 
-        if (child.name === "Screen") {
-          child.material = new THREE.MeshBasicMaterial({
+        // Fix compuetr name
+        if (child.name === "Montor") {
+          child.children[1].material = new THREE.MeshBasicMaterial({
             map: items.screen,
           });
         }
