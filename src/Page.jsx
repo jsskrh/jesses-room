@@ -99,7 +99,7 @@ function Page() {
           </div>
         </section>
 
-        <div className="second-margin section-margin"></div>
+        <div className="third-margin section-margin"></div>
 
         <section className="works-section section left">
           <div className="section-content">
@@ -121,7 +121,7 @@ function Page() {
           </div>
         </section>
 
-        <div className="second-margin section-margin"></div>
+        <div className="fourth-margin section-margin"></div>
 
         <section className="contact-section section left">
           <div className="section-header">
@@ -146,7 +146,7 @@ function Page() {
           </div>
         </section>
 
-        <div className="second-margin section-margin"></div>
+        <div className="fifth-margin section-margin"></div>
 
         <section className="finally-section section right">
           <div className="section-header">
