@@ -1,12 +1,99 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 import "./Page.css";
 import ToggleBar from "./ToggleBar";
+import GSAP from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
-function Page() {
+function useArrayRef() {
+  const refs = useRef([]);
+  refs.current = [];
+  return [refs, (ref) => ref && refs.current.push(ref)];
+}
+
+function Page({ pageRef }) {
+  /* const sectionRef = useRef(null); */
+  /* const sections = []; */
+  const [sections, setSection] = useArrayRef();
+  const progressWrapperRef = useRef(null);
+  const progressBarRef = useRef(null);
+
+  useEffect(() => {
+    GSAP.registerPlugin(ScrollTrigger);
+
+    ScrollTrigger.matchMedia({
+      // all
+      all: function () {
+        // ScrollTriggers created here aren't associated with a particular media query,
+        // so they persist.
+        sections.current.forEach((section) => {
+          const progressWrapper = section.children[0].children[0];
+          const progressBar = progressWrapper.children[0];
+          console.log(progressBar);
+
+          if (section.classList.contains("right")) {
+            GSAP.to(section, {
+              borderTopLeftRadius: 10,
+              scrollTrigger: {
+                trigger: section,
+                start: "top bottom",
+                end: "top top",
+                scrub: 0.6,
+                markers: true,
+              },
+            });
+            GSAP.to(section, {
+              borderBottomLeftRadius: 700,
+              scrollTrigger: {
+                trigger: section,
+                start: "bottom bottom",
+                end: "bottom top",
+                scrub: 0.6,
+                markers: true,
+              },
+            });
+          } else {
+            GSAP.to(section, {
+              borderTopRightRadius: 10,
+              scrollTrigger: {
+                trigger: section,
+                start: "top bottom",
+                end: "top top",
+                scrub: 0.6,
+                markers: true,
+              },
+            });
+            GSAP.to(section, {
+              borderBottomRightRadius: 700,
+              scrollTrigger: {
+                trigger: section,
+                start: "bottom bottom",
+                end: "bottom top",
+                scrub: 0.6,
+                markers: true,
+              },
+            });
+          }
+
+          GSAP.from(progressBar, {
+            scaleY: 0,
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.4,
+              pin: progressWrapper,
+              pinSpacing: false,
+            },
+          });
+        });
+      },
+    });
+  }, [sections]);
+
   return (
     <div className="page">
       <ToggleBar />
-      <div className="page-wrapper">
+      <div className="page-wrapper" asscroll="true" ref={pageRef}>
         <section className="hero">
           <div className="hero-wrapper">
             <div className="hero-main hero-bottom">
@@ -23,7 +110,16 @@ function Page() {
 
         <div className="first-margin section-margin"></div>
 
-        <section className="about-section section left">
+        <section className="about-section section left" ref={setSection}>
+          <div
+            className="progress-wrapper progress-bar-wrapper-left"
+            ref={progressWrapperRef}
+          >
+            <div
+              className="progress-bar pink-background"
+              ref={progressBarRef}
+            ></div>
+          </div>
           <div className="section-header">
             <div className="header-top">
               <span className="section-title-text">About me</span>
@@ -62,7 +158,16 @@ function Page() {
 
         <div className="second-margin section-margin"></div>
 
-        <section className="works-section section right">
+        <section className="works-section section right" ref={setSection}>
+          <div
+            className="progress-wrapper progress-bar-wrapper-right"
+            ref={progressWrapperRef}
+          >
+            <div
+              className="progress-bar green-background"
+              ref={progressBarRef}
+            ></div>
+          </div>
           <div className="section-header">
             <div className="header-top">
               <span className="section-title-text">My Works</span>
@@ -101,7 +206,10 @@ function Page() {
 
         <div className="third-margin section-margin"></div>
 
-        <section className="works-section section left">
+        <section className="works-section section left" ref={setSection}>
+          <div className="progress-wrapper progress-bar-wrapper-left">
+            <div className="progress-bar green-background"></div>
+          </div>
           <div className="section-content">
             <div className="section-text">
               <h3 className="text-head">Lorem Ipsum</h3>
@@ -123,7 +231,10 @@ function Page() {
 
         <div className="fourth-margin section-margin"></div>
 
-        <section className="contact-section section left">
+        <section className="contact-section section left" ref={setSection}>
+          <div className="progress-wrapper progress-bar-wrapper-left">
+            <div className="progress-bar blue-background"></div>
+          </div>
           <div className="section-header">
             <div className="header-top">
               <span className="section-title-text">Contact</span>
@@ -148,7 +259,10 @@ function Page() {
 
         <div className="fifth-margin section-margin"></div>
 
-        <section className="finally-section section right">
+        <section className="finally-section section right" ref={setSection}>
+          <div className="progress-wrapper progress-bar-wrapper-right">
+            <div className="progress-bar cream-background"></div>
+          </div>
           <div className="section-header">
             <div className="header-top">
               <span className="section-title-text">Finally</span>

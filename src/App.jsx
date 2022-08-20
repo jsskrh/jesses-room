@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Canvas from "./Canvas";
 import Page from "./Page";
@@ -7,12 +7,71 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import * as THREE from "three";
 import { useStateValue } from "./StateProvider";
+import GSAP from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
+import ASScroll from "@ashthornton/asscroll";
 
 function App() {
   const [{ theme }, dispatch] = useStateValue();
 
   const [items, setItems] = useState({});
   const [ready, setReady] = useState(false);
+  const [tl, setTl] = useState(() => GSAP.timeline());
+
+  const pageRef = useRef();
+
+  console.log("app mounted");
+
+  const setupASScroll = () => {
+    // https://github.com/ashthornton/asscroll
+    const asscroll = new ASScroll({
+      ease: 0.3,
+      disableRaf: true,
+    });
+
+    GSAP.ticker.add(asscroll.update);
+
+    ScrollTrigger.defaults({
+      scroller: asscroll.containerElement,
+    });
+
+    ScrollTrigger.scrollerProxy(asscroll.containerElement, {
+      scrollTop(value) {
+        if (arguments.length) {
+          asscroll.currentPos = value;
+          return;
+        }
+        return asscroll.currentPos;
+      },
+      getBoundingClientRect() {
+        return {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+      },
+      fixedMarkers: true,
+    });
+
+    asscroll.on("update", ScrollTrigger.update);
+    ScrollTrigger.addEventListener("refresh", asscroll.resize);
+
+    requestAnimationFrame(() => {
+      asscroll.enable({
+        newScrollElements: document.querySelectorAll(
+          ".gsap-marker-start, .gsap-marker-end, [asscroll]"
+        ),
+      });
+    });
+    return asscroll;
+  };
+
+  useEffect(() => {
+    if (ready) {
+      const asscroll = setupASScroll();
+    }
+  }, [ready]);
 
   useEffect(() => {
     const queue = assets.length;
@@ -73,9 +132,13 @@ function App() {
   }, []);
 
   return (
-    <div className={theme ? "App dark-theme" : "App light-theme"}>
-      <Canvas ready={ready} items={items} />
-      {ready && <Page />}
+    <div
+      className={theme ? "App dark-theme" : "App light-theme"}
+      asscroll-container="true"
+    >
+      <Canvas ready={ready} items={items} pageRef={pageRef} timeline={tl} />
+      {ready && <Page pageRef={pageRef} />}
+      {/* <React.StrictMode>{ready && <Page pageRef={pageRef} />}</React.StrictMode> */}
     </div>
   );
 }

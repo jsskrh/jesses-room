@@ -48,14 +48,16 @@
 
 .section-margin {
   width: 100%;
-  height: 4000px;
+  height: 3000px;
 }
 
 .section {
   width: 50%;
-  padding: 0 4%;
+  padding: 1000px 4%;
   margin: 0;
   background-color: var(--section-bg);
+  position: relative;
+  overflow: hidden;
 }
 
 /* optimize later on, make them components */
@@ -107,10 +109,56 @@
 
 .left {
   margin-right: auto;
+  border-top-right-radius: 700px 700px;
+  border-bottom-right-radius: 0px 0px;
 }
 
 .right {
   margin-left: auto;
+  border-top-left-radius: 700px 700px;
+  border-bottom-left-radius: 0px 0px;
+}
+
+/* Progress bar */
+.progress-wrapper {
+  height: 0;
+  width: 12px;
+  z-index: 9999;
+}
+
+.progress-bar-wrapper-left {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.progress-bar-wrapper-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.progress-bar {
+  height: 100vh;
+  width: 100%;
+  transform-origin: top center;
+  transform: scaleY(1);
+}
+
+.pink-background {
+  background-color: var(--color-primary);
+}
+
+.green-background {
+  background-color: var(--color-green);
+}
+
+.blue-background {
+  background-color: var(--color-blue);
+}
+
+.cream-background {
+  background-color: var(--color-cream);
 }
 
 .section-header {
@@ -202,5 +250,10 @@
 @media (max-width: 968px) {
   .section {
     width: 100%;
+  }
+
+  .progress-bar-wrapper-left {
+    right: 0;
+    left: auto;
   }
 }
