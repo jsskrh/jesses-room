@@ -5,8 +5,18 @@ import { useStateValue } from "./StateProvider";
 import { useState } from "react";
 
 function Animations({ ready, roomObject, children }) {
-  const [{ reduxSections, camera, monitorLight, lampLight, tankLight }] =
-    useStateValue();
+  const [
+    {
+      reduxSections,
+      camera,
+      monitorLight,
+      lampLight,
+      tankLight,
+      circleFirst,
+      circleSecond,
+      circleThird,
+    },
+  ] = useStateValue();
 
   const [room, setRoom] = useState({});
 
@@ -103,7 +113,7 @@ function Animations({ ready, roomObject, children }) {
             },
           }).to(orthographicCamera.position, {
             x: 2,
-            y: 8.5,
+            y: 9.2,
           });
 
           // Fourth Section
@@ -118,7 +128,7 @@ function Animations({ ready, roomObject, children }) {
             },
           }).to(orthographicCamera.position, {
             x: -3.5,
-            y: -3,
+            y: -2.3,
           });
 
           // Fifth Section
@@ -173,6 +183,7 @@ function Animations({ ready, roomObject, children }) {
         },
 
         // Mobile
+        // touch up camera positioning on the third to fifth sections
         "(max-width: 968px)": () => {
           // Room in mobile
           actualRoom.scale.set(0.07, 0.07, 0.07);
@@ -444,6 +455,87 @@ function Animations({ ready, roomObject, children }) {
           secondPartTimeline.add(seventh, "-=0.2");
           secondPartTimeline.add(eigth);
           secondPartTimeline.add(ninth, "-=0.1");
+
+          // First Section
+          const firstMoveTimeline = new GSAP.timeline({
+            scrollTrigger: {
+              trigger: ".first-margin",
+              markers: true,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          }).to(circleFirst.scale, {
+            x: 3,
+            y: 3,
+            z: 3,
+          });
+
+          // Second Section
+          const secondMoveTimeline = new GSAP.timeline({
+            scrollTrigger: {
+              trigger: ".second-margin",
+              markers: true,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          })
+            .to(
+              circleSecond.scale,
+              {
+                x: 3,
+                y: 3,
+                z: 3,
+              },
+              "same"
+            )
+            .to(
+              actualRoom.position,
+              {
+                y: 0.7,
+              },
+              "same"
+            )
+            .to(
+              orthographicCamera.position,
+              {
+                y: 4.7,
+              },
+              "same"
+            );
+
+          // Fourth Section
+          const fourthMoveTimeline = new GSAP.timeline({
+            scrollTrigger: {
+              trigger: ".fourth-margin",
+              markers: true,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          }).to(circleThird.scale, {
+            x: 3,
+            y: 3,
+            z: 3,
+          });
+
+          // Fifth Section
+          const fifthMoveTimeline = new GSAP.timeline({
+            scrollTrigger: {
+              trigger: ".fifth-margin",
+              markers: true,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          }).to(actualRoom.position, {
+            y: 0,
+          });
 
           const sections = reduxSections;
           sections.forEach((section) => {

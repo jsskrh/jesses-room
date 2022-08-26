@@ -47,6 +47,27 @@ function Canvas({ ready, items, roomObject }) {
     });
   };
 
+  const create_circle_first = (circleFirst) => {
+    dispatch({
+      type: "create_circle_first",
+      circleFirst: circleFirst,
+    });
+  };
+
+  const create_circle_second = (circleSecond) => {
+    dispatch({
+      type: "create_circle_second",
+      circleSecond: circleSecond,
+    });
+  };
+
+  const create_circle_third = (circleThird) => {
+    dispatch({
+      type: "create_circle_third",
+      circleThird: circleThird,
+    });
+  };
+
   const experienceRef = useRef(null);
   const themeRef = useRef(theme);
 
@@ -369,10 +390,10 @@ function Canvas({ ready, items, roomObject }) {
         /* color: 0x000000, */
         /* color: 0x6e85b7, */
         /* color: 0xffffff, */
-        side: THREE.DoubleSide,
+        side: THREE.BackSide,
       });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.rotation.x = -Math.PI / 2;
+      plane.rotation.x = Math.PI / 2;
       plane.position.y = -0.4;
       /* plane.material.color.setHex(0xfbf4e4); */
       /* plane.material.color.setHex(0x000000); */
@@ -383,6 +404,48 @@ function Canvas({ ready, items, roomObject }) {
         plane.material.color.copy(obj.colorObj);
         console.log(obj.colorObj);
       }); */
+
+      // CIRCLES
+      const circleGeometry = new THREE.CircleGeometry(5, 64);
+      const circleMaterial = new THREE.MeshStandardMaterial({
+        color: 0xdb929d,
+      });
+      const circleMaterial2 = new THREE.MeshStandardMaterial({
+        color: 0x7bd0ad,
+      });
+      const circleMaterial3 = new THREE.MeshStandardMaterial({
+        color: 0x95abe5,
+      });
+
+      const circleFirst = new THREE.Mesh(circleGeometry, circleMaterial);
+      const circleSecond = new THREE.Mesh(circleGeometry, circleMaterial2);
+      const circleThird = new THREE.Mesh(circleGeometry, circleMaterial3);
+
+      circleFirst.position.y = -0.39;
+      circleSecond.position.y = -0.38;
+      circleThird.position.y = -0.37;
+
+      circleFirst.scale.set(0, 0, 0);
+      circleSecond.scale.set(0, 0, 0);
+      circleThird.scale.set(0, 0, 0);
+
+      circleFirst.rotation.x =
+        circleSecond.rotation.x =
+        circleThird.rotation.x =
+          -Math.PI / 2;
+
+      circleFirst.receiveShadow =
+        circleSecond.receiveShadow =
+        circleThird.receiveShadow =
+          true;
+
+      create_circle_first(circleFirst);
+      create_circle_second(circleSecond);
+      create_circle_third(circleThird);
+
+      scene.add(circleFirst);
+      scene.add(circleSecond);
+      scene.add(circleThird);
 
       // ANIMATE
       var animate = function () {

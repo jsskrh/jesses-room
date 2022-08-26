@@ -43,6 +43,24 @@ const reducer = (state, action) => {
         lampLight: action.lampLight,
       };
 
+    case "create_circle_first":
+      return {
+        ...state,
+        circleFirst: action.circleFirst,
+      };
+
+    case "create_circle_second":
+      return {
+        ...state,
+        circleSecond: action.circleSecond,
+      };
+
+    case "create_circle_third":
+      return {
+        ...state,
+        circleThird: action.circleThird,
+      };
+
     default:
       return state;
   }
@@ -55,6 +73,9 @@ export const initialState = {
   monitorLight: {},
   tankLight: {},
   lampLight: {},
+  circleFirst: {},
+  circleSecond: {},
+  circleThird: {},
 };
 
 export default reducer;
