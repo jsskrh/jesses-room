@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Canvas from "./Canvas";
 import Page from "./Page";
+import Animations from "./Animations";
 import assets from "./assets";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
@@ -12,15 +13,11 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 import ASScroll from "@ashthornton/asscroll";
 
 function App() {
-  const [{ theme }, dispatch] = useStateValue();
+  const [{ theme }] = useStateValue();
 
   const [items, setItems] = useState({});
   const [ready, setReady] = useState(false);
-  const [tl, setTl] = useState(() => GSAP.timeline());
-
-  const pageRef = useRef();
-
-  console.log("app mounted");
+  const [room, setRoom] = useState({});
 
   const setupASScroll = () => {
     // https://github.com/ashthornton/asscroll
@@ -123,6 +120,7 @@ function App() {
 
       if (loaded === queue) {
         setItems(items);
+        setRoom(items.room);
         setReady(true);
       }
     };
@@ -131,14 +129,21 @@ function App() {
     startLoading();
   }, []);
 
+  /* useEffect(() => {
+    if (ready) {
+      setRoom(items.scene);
+    }
+  }); */
+
   return (
     <div
       className={theme ? "App dark-theme" : "App light-theme"}
       asscroll-container="true"
     >
-      <Canvas ready={ready} items={items} pageRef={pageRef} timeline={tl} />
-      {ready && <Page pageRef={pageRef} />}
-      {/* <React.StrictMode>{ready && <Page pageRef={pageRef} />}</React.StrictMode> */}
+      <Animations roomObject={room} ready={ready} items={items}>
+        <Canvas ready={ready} items={items} roomObject={room} />
+        {ready && <Page roomObject={room} />}
+      </Animations>
     </div>
   );
 }

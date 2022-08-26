@@ -8,138 +8,47 @@ import { useStateValue } from "./StateProvider";
 import GUI from "lil-gui";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 
-function Canvas({ ready, items, pageRef }) {
-  const [{ theme }] = useStateValue();
+function Canvas({ ready, items, roomObject }) {
+  const [{ theme }, dispatch] = useStateValue();
 
-  const [room, setActualRoom] = useState({});
-  const [frustum, setFrustum] = useState();
-  const [camera, setCamera] = useState({});
+  const [room, setRoom] = useState({});
 
   useEffect(() => {
     if (ready) {
-      const scene = new THREE.Scene();
-      const room = items.room;
-      setActualRoom(room.scene);
-      console.log(room);
+      setRoom(roomObject.scene);
     }
   });
 
+  const create_camera = (camera) => {
+    dispatch({
+      type: "create_camera",
+      camera: camera,
+    });
+  };
+
+  const create_monitor_light = (monitorLight) => {
+    dispatch({
+      type: "create_monitor_light",
+      monitorLight: monitorLight,
+    });
+  };
+
+  const create_tank_light = (tankLight) => {
+    dispatch({
+      type: "create_tank_light",
+      tankLight: tankLight,
+    });
+  };
+
+  const create_lamp_light = (lampLight) => {
+    dispatch({
+      type: "create_lamp_light",
+      lampLight: lampLight,
+    });
+  };
+
   const experienceRef = useRef(null);
-
   const themeRef = useRef(theme);
-  const roomRef = useRef(room);
-
-  const [pageWrapper] = useState(pageRef.current);
-
-  /* console.log(pageRef.current); */
-
-  /* let asscroll;
-
-  const setupASScroll = () => {
-    // 3rd party library setup:
-    asscroll = new ASScroll({
-      // containerElement: '.my-container',
-      scrollElements: pageEl,
-      ease: 0.3,
-      touchEase: 1,
-      scrollbarStyles: true,
-      disableNativeScrollbar: true,
-      touchScrollType: "scrollTop",
-      disableRaf: true,
-      disableResize: true,
-      limitLerpRate: true,
-      blockScrollClass: ".asscroll-block",
-    });
-    asscroll.enable();
-
-    requestAnimationFrame(onRaf);
-  };
-  const onRaf = () => {
-    asscroll.update();
-    requestAnimationFrame(onRaf);
-  }; */
-
-  /* const setupASScroll = () => {
-    // 3rd party library setup:
-    const bodyScrollBar = Scrollbar.init(document.body, {
-      damping: 0.1,
-      delegateTo: document,
-    });
-
-    // Tell ScrollTrigger to use these proxy getter/setter methods for the "body" element:
-    ScrollTrigger.scrollerProxy(document.body, {
-      scrollTop(value) {
-        if (arguments.length) {
-          bodyScrollBar.scrollTop = value; // setter
-        }
-        return bodyScrollBar.scrollTop; // getter
-      },
-      getBoundingClientRect() {
-        return {
-          top: 0,
-          left: 0,
-          width: window.innerWidth,
-          height: window.innerHeight,
-        };
-      },
-    });
-
-    // when the smooth scroller updates, tell ScrollTrigger to update() too:
-    bodyScrollBar.addListener(ScrollTrigger.update);
-  }; */
-
-  /* const setupASScroll = () => {
-    // https://github.com/ashthornton/asscroll
-    const asscroll = new ASScroll({
-      ease: 0.3,
-      disableRaf: true,
-    });
-
-    GSAP.ticker.add(asscroll.update);
-
-    ScrollTrigger.defaults({
-      scroller: asscroll.containerElement,
-    });
-
-    ScrollTrigger.scrollerProxy(asscroll.containerElement, {
-      scrollTop(value) {
-        if (arguments.length) {
-          asscroll.currentPos = value;
-          return;
-        }
-        return asscroll.currentPos;
-      },
-      getBoundingClientRect() {
-        return {
-          top: 0,
-          left: 0,
-          width: window.innerWidth,
-          height: window.innerHeight,
-        };
-      },
-      fixedMarkers: true,
-    });
-
-    asscroll.on("update", ScrollTrigger.update);
-    ScrollTrigger.addEventListener("refresh", asscroll.resize);
-
-    requestAnimationFrame(() => {
-      asscroll.enable({
-        newScrollElements: document.querySelectorAll(
-          ".gsap-marker-start, .gsap-marker-end, [asscroll]"
-        ),
-      });
-    });
-    return asscroll;
-  };
-
-  useEffect(
-    () => {
-      if (ready) {
-        const asscroll = setupASScroll();
-      }
-    } , [ready]
-  ); */
 
   useEffect(() => {
     themeRef.current = theme;
@@ -162,6 +71,8 @@ function Canvas({ ready, items, pageRef }) {
         target: 0,
         ease: 0.1,
       };
+
+      /* console.log(room, "sue"); */
 
       /* const gui = new GUI({ container: document.querySelector(".hero-main") }); */
 
@@ -221,7 +132,6 @@ function Canvas({ ready, items, pageRef }) {
         50
       ); */
       const frustrum = 5;
-      setFrustum(frustrum);
       const orthographicCamera = new THREE.OrthographicCamera(
         ((-window.innerWidth / window.innerHeight) * frustrum) / 2, //note
         ((window.innerWidth / window.innerHeight) * frustrum) / 2,
@@ -230,7 +140,7 @@ function Canvas({ ready, items, pageRef }) {
         -50,
         50
       );
-      setCamera(orthographicCamera);
+      create_camera(orthographicCamera);
 
       orthographicCamera.position.y = 4;
       orthographicCamera.position.z = 5;
@@ -277,16 +187,12 @@ function Canvas({ ready, items, pageRef }) {
       let delta = 16;
 
       // ROOM
-      const room = items.room;
-      const actualRoom = room.scene;
-      /* setActualRoom(actualRoom); */
+      const actualRoom = roomObject.scene;
       scene.add(actualRoom);
       actualRoom.scale.set(0.11, 0.11, 0.11);
       actualRoom.children.forEach((child) => {
         child.castShadow = true;
         child.receiveShadow = true;
-
-        /* console.log(child); */
 
         if (child instanceof THREE.Group) {
           child.children.forEach((groupChild) => {
@@ -317,7 +223,7 @@ function Canvas({ ready, items, pageRef }) {
           child.material.opacity = 0.5;
         }
 
-        // Fix compuetr name
+        // Fix computer name
         if (child.name === "Montor") {
           child.children[1].material = new THREE.MeshBasicMaterial({
             map: items.screen,
@@ -354,7 +260,6 @@ function Canvas({ ready, items, pageRef }) {
         );
         actualRoom.rotation.y = lerp.current;
       });
-      /* console.log(room); */
 
       // FISH
       // fix fish animation
@@ -374,18 +279,21 @@ function Canvas({ ready, items, pageRef }) {
       monitorLight.position.set(-7.1, 8.3, -3.6);
       /* monitorLight.position.set(-9.56, 8.3, -1); */
       monitorLight.rotation.y = (Math.PI / 4) * 5;
+      create_monitor_light(monitorLight);
       /* actualRoom.add(monitorLight); */
 
       const tankLight = new THREE.RectAreaLight(0xffffff, 0, 0.5, 1.015);
       tankLight.position.set(9.08244, 7.2, -0.510353);
       tankLight.rotation.x = -Math.PI / 2;
       tankLight.rotation.z = Math.PI / 4;
+      create_tank_light(tankLight);
       //actualRoom.add(tankLight);
 
       const lampLight = new THREE.RectAreaLight(0xffffff, 0, 0.1, 0.1);
       lampLight.position.set(-8.72089, 1.215046, 13.5548);
       lampLight.rotation.x = -Math.PI / 2;
       lampLight.rotation.z = Math.PI / 4;
+      create_lamp_light(lampLight);
       //actualRoom.add(lampLight);
 
       // DARK THEME
@@ -446,432 +354,6 @@ function Canvas({ ready, items, pageRef }) {
       });
       /* console.log(actualRoom.position); */
 
-      /* GSAP.registerPlugin(ScrollTrigger);
-
-      ScrollTrigger.matchMedia({
-        // Desktop
-        "(min-width: 969px)": () => {
-          actualRoom.scale.set(0.11, 0.11, 0.11);
-          monitorLight.width = 0.724;
-          monitorLight.height = 0.3515;
-          tankLight.width = 0.5;
-          tankLight.height = 1.015;
-          lampLight.width = 0.1;
-          lampLight.height = 0.1;
-
-          // First Section
-          const firstMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".first-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(actualRoom.position, {
-            x: () => {
-              return innerWidth * 0.00145;
-            },
-          });
-
-          // Second Section
-          const secondMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".second-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-            .to(
-              actualRoom.position,
-              {
-                x: () => {
-                  return 1;
-                },
-                z: () => {
-                  return innerHeight * 0.0055;
-                },
-              },
-              "same"
-            )
-            .to(
-              actualRoom.scale,
-              {
-                x: 0.4,
-                y: 0.4,
-                z: 0.4,
-              },
-              "same"
-            )
-            .to(
-              monitorLight,
-              {
-                width: 0.724 * 4,
-                height: 0.3515 * 4,
-              },
-              "same"
-            );
-
-          // Third Section
-          const thirdMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".third-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: 2,
-            y: 8.5,
-          });
-
-          // Fourth Section
-          const fourthMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fourth-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: -3.5,
-            y: -3,
-          });
-
-          // Fifth Section
-          const fifthMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fifth-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-            .to(
-              actualRoom.position,
-              {
-                x: () => {
-                  return innerWidth * -0.00175;
-                },
-                z: () => {
-                  return 0;
-                },
-              },
-              "same"
-            )
-            .to(
-              actualRoom.scale,
-              {
-                x: 0.11,
-                y: 0.11,
-                z: 0.11,
-              },
-              "same"
-            )
-            .to(
-              monitorLight,
-              {
-                width: 0.724,
-                height: 0.3515,
-              },
-              "same"
-            )
-            .to(
-              orthographicCamera.position,
-              {
-                x: 0,
-                y: 4,
-                z: 5,
-              },
-              "same"
-            );
-        },
-
-        // Mobile
-        "(max-width: 968px)": () => {
-          // Room in mobile
-          actualRoom.scale.set(0.07, 0.07, 0.07);
-          actualRoom.position.set(-0.05, 0, 0);
-          monitorLight.width = 0.4607;
-          monitorLight.height = 0.2237;
-          tankLight.width = 0.3181;
-          tankLight.height = 0.6459;
-          lampLight.width = 0.0636;
-          lampLight.height = 0.0636;
-
-          // First Section
-          const firstMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".first-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(
-            actualRoom.scale,
-            {
-              x: 0.1,
-              y: 0.1,
-              z: 0.1,
-            },
-            "same"
-          );
-
-          // Second Section
-          const secondMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".second-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-            .to(
-              actualRoom.position,
-              {
-                x: 1.5,
-                z: () => {
-                  return innerHeight * 0.0025;
-                },
-              },
-              "same"
-            )
-            .to(
-              actualRoom.scale,
-              {
-                x: 0.25,
-                y: 0.25,
-                z: 0.25,
-              },
-              "same"
-            )
-            .to(
-              monitorLight,
-              {
-                width: 0.724 * 3.4,
-                height: 0.3515 * 3.4,
-              },
-              "same"
-            );
-
-          // Third Section
-          const thirdMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".third-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: 3.56,
-            y: 6.5,
-          });
-
-          // Fourth Section
-          const fourthMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fourth-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: -0.02,
-            y: -0.55,
-          });
-
-          // Fifth Section
-          const fifthMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fifth-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-            .to(
-              actualRoom.position,
-              {
-                x: -0.05,
-                z: 0,
-                y: 0,
-              },
-              "same"
-            )
-            .to(
-              actualRoom.scale,
-              {
-                x: 0.07,
-                y: 0.07,
-                z: 0.07,
-              },
-              "same"
-            )
-            .to(
-              monitorLight,
-              {
-                width: 0.724,
-                height: 0.3515,
-              },
-              "same"
-            )
-            .to(
-              orthographicCamera.position,
-              {
-                x: 0,
-                y: 4,
-                z: 5,
-              },
-              "same"
-            );
-        },
-
-        // all
-        all: function () {
-          // ScrollTriggers created here aren't associated with a particular media query,
-          // so they persist.
-          // Mini platform animation
-          const secondPartTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fourth-margin",
-              markers: true,
-              start: "center center",
-            },
-          });
-
-          let first;
-          let second;
-          let third;
-          let fourth;
-          let fifth;
-          let sixth;
-          let seventh;
-          let eigth;
-          let ninth;
-
-          actualRoom.children.forEach((child) => {
-            if (child.name === "Floor") {
-              first = GSAP.to(child.position, {
-                x: 3.07688,
-                z: 2.66616,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            // set origin to bottom
-            if (child.name === "Mailbox") {
-              second = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Lamp") {
-              third = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad001") {
-              fourth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad002") {
-              fifth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad003") {
-              sixth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower_Pad") {
-              seventh = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower001") {
-              eigth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower002") {
-              ninth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-          });
-          secondPartTimeline.add(first);
-          secondPartTimeline.add(second);
-          secondPartTimeline.add(third);
-          secondPartTimeline.add(fourth, "-=0.2");
-          secondPartTimeline.add(fifth, "-=0.2");
-          secondPartTimeline.add(sixth, "-=0.2");
-          secondPartTimeline.add(seventh, "-=0.2");
-          secondPartTimeline.add(eigth);
-          secondPartTimeline.add(ninth, "-=0.1");
-        },
-      }); */
-
       const rectLightHelper = new RectAreaLightHelper(monitorLight);
       monitorLight.add(rectLightHelper);
 
@@ -885,6 +367,7 @@ sunLight.intesity = obj.intesity;
       const planeGeometry = new THREE.PlaneGeometry(100, 100);
       const planeMaterial = new THREE.MeshStandardMaterial({
         color: 0xfbf4e4,
+        /* color: 0x000000, */
         /* color: 0x6e85b7, */
         /* color: 0xffffff, */
         side: THREE.DoubleSide,
@@ -892,6 +375,7 @@ sunLight.intesity = obj.intesity;
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = -Math.PI / 2;
       plane.position.y = -0.4;
+      /* plane.material.color.setHex(0xfbf4e4); */
       /* plane.material.color.setHex(0x000000); */
       plane.receiveShadow = true;
       scene.add(plane);
@@ -938,513 +422,7 @@ sunLight.intesity = obj.intesity;
     }
   }, [ready]);
 
-  useEffect(() => {
-    if (ready) {
-      /* const room = items.room; */
-      const actualRoom = room;
-      const orthographicCamera = camera;
-      console.log("yup");
-
-      /* console.log(pageRef.current); */
-
-      GSAP.registerPlugin(ScrollTrigger);
-
-      ScrollTrigger.matchMedia({
-        // Desktop
-        "(min-width: 969px)": () => {
-          actualRoom.scale.set(0.11, 0.11, 0.11);
-          /* monitorLight.width = 0.724;
-          monitorLight.height = 0.3515;
-          tankLight.width = 0.5;
-          tankLight.height = 1.015;
-          lampLight.width = 0.1;
-          lampLight.height = 0.1; */
-
-          // First Section
-          const firstMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".first-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(actualRoom.position, {
-            x: () => {
-              return innerWidth * 0.00145;
-            },
-          });
-
-          // Second Section
-          const secondMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".second-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-            .to(
-              actualRoom.position,
-              {
-                x: () => {
-                  return 1;
-                },
-                z: () => {
-                  return innerHeight * 0.0055;
-                },
-              },
-              "same"
-            )
-            .to(
-              actualRoom.scale,
-              {
-                x: 0.4,
-                y: 0.4,
-                z: 0.4,
-              },
-              "same"
-            );
-          /* .to(
-              monitorLight,
-              {
-                width: 0.724 * 4,
-                height: 0.3515 * 4,
-              },
-              "same"
-            ); */
-
-          // Third Section
-          const thirdMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".third-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: 2,
-            y: 8.5,
-          });
-
-          // Fourth Section
-          const fourthMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fourth-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: -3.5,
-            y: -3,
-          });
-
-          // Fifth Section
-          const fifthMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fifth-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-            .to(
-              actualRoom.position,
-              {
-                x: () => {
-                  return innerWidth * -0.00175;
-                },
-                z: () => {
-                  return 0;
-                },
-              },
-              "same"
-            )
-            .to(
-              actualRoom.scale,
-              {
-                x: 0.11,
-                y: 0.11,
-                z: 0.11,
-              },
-              "same"
-            )
-            /* .to(
-              monitorLight,
-              {
-                width: 0.724,
-                height: 0.3515,
-              },
-              "same"
-            ) */
-            .to(
-              orthographicCamera.position,
-              {
-                x: 0,
-                y: 4,
-                z: 5,
-              },
-              "same"
-            );
-        },
-
-        // Mobile
-        "(max-width: 968px)": () => {
-          // Room in mobile
-          actualRoom.scale.set(0.07, 0.07, 0.07);
-          actualRoom.position.set(-0.05, 0, 0);
-          /* monitorLight.width = 0.4607;
-          monitorLight.height = 0.2237;
-          tankLight.width = 0.3181;
-          tankLight.height = 0.6459;
-          lampLight.width = 0.0636;
-          lampLight.height = 0.0636; */
-
-          // First Section
-          const firstMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".first-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(
-            actualRoom.scale,
-            {
-              x: 0.1,
-              y: 0.1,
-              z: 0.1,
-            },
-            "same"
-          );
-
-          // Second Section
-          const secondMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".second-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-            .to(
-              actualRoom.position,
-              {
-                x: 1.5,
-                z: () => {
-                  return innerHeight * 0.0025;
-                },
-              },
-              "same"
-            )
-            .to(
-              actualRoom.scale,
-              {
-                x: 0.25,
-                y: 0.25,
-                z: 0.25,
-              },
-              "same"
-            );
-          /* .to(
-              monitorLight,
-              {
-                width: 0.724 * 3.4,
-                height: 0.3515 * 3.4,
-              },
-              "same"
-            ); */
-
-          // Third Section
-          const thirdMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".third-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: 3.56,
-            y: 6.5,
-          });
-
-          // Fourth Section
-          const fourthMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fourth-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: -0.02,
-            y: -0.55,
-          });
-
-          // Fifth Section
-          const fifthMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fifth-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          })
-            .to(
-              actualRoom.position,
-              {
-                x: -0.05,
-                z: 0,
-                y: 0,
-              },
-              "same"
-            )
-            .to(
-              actualRoom.scale,
-              {
-                x: 0.07,
-                y: 0.07,
-                z: 0.07,
-              },
-              "same"
-            )
-            /* .to(
-              monitorLight,
-              {
-                width: 0.724,
-                height: 0.3515,
-              },
-              "same"
-            ) */
-            .to(
-              orthographicCamera.position,
-              {
-                x: 0,
-                y: 4,
-                z: 5,
-              },
-              "same"
-            );
-        },
-
-        // all
-        all: function () {
-          // ScrollTriggers created here aren't associated with a particular media query,
-          // so they persist.
-          // Mini platform animation
-          const secondPartTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".fourth-margin",
-              markers: true,
-              start: "center center",
-            },
-          });
-
-          let first;
-          let second;
-          let third;
-          let fourth;
-          let fifth;
-          let sixth;
-          let seventh;
-          let eigth;
-          let ninth;
-
-          actualRoom.children.forEach((child) => {
-            if (child.name === "Floor") {
-              first = GSAP.to(child.position, {
-                x: 3.07688,
-                z: 2.66616,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            // set origin to bottom
-            if (child.name === "Mailbox") {
-              second = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Lamp") {
-              third = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad001") {
-              fourth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad002") {
-              fifth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad003") {
-              sixth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower_Pad") {
-              seventh = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower001") {
-              eigth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower002") {
-              ninth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-          });
-          secondPartTimeline.add(first);
-          secondPartTimeline.add(second);
-          secondPartTimeline.add(third);
-          secondPartTimeline.add(fourth, "-=0.2");
-          secondPartTimeline.add(fifth, "-=0.2");
-          secondPartTimeline.add(sixth, "-=0.2");
-          secondPartTimeline.add(seventh, "-=0.2");
-          secondPartTimeline.add(eigth);
-          secondPartTimeline.add(ninth, "-=0.1");
-
-          /* const sections = document.querySelectorAll(".section");
-          sections.forEach((section) => {
-            const progressWrapper = document.querySelector(".progress-wrapper");
-            const progressBar = document.querySelector(".progress-bar");
-            console.log(progressBar);
-
-            if (section.classList.contains("right")) {
-              GSAP.to(section, {
-                borderTopLeftRadius: 10,
-                scrollTrigger: {
-                  trigger: section,
-                  start: "top bottom",
-                  end: "top top",
-                  scrub: 0.6,
-                  markers: true,
-                },
-              });
-              GSAP.to(section, {
-                borderBottomLeftRadius: 700,
-                scrollTrigger: {
-                  trigger: section,
-                  start: "bottom bottom",
-                  end: "bottom top",
-                  scrub: 0.6,
-                  markers: true,
-                },
-              });
-            } else {
-              GSAP.to(section, {
-                borderTopRightRadius: 10,
-                scrollTrigger: {
-                  trigger: section,
-                  start: "top bottom",
-                  end: "top top",
-                  scrub: 0.6,
-                  markers: true,
-                },
-              });
-              GSAP.to(section, {
-                borderBottomRightRadius: 700,
-                scrollTrigger: {
-                  trigger: section,
-                  start: "bottom bottom",
-                  end: "bottom top",
-                  scrub: 0.6,
-                  markers: true,
-                },
-              });
-            }
-
-            GSAP.from(progressBar, {
-              scaleY: 0,
-              scrollTrigger: {
-                trigger: section,
-                start: "top top",
-                end: "bottom bottom",
-                scrub: 0.4,
-                pin: progressWrapper,
-                pinSpacing: false,
-              },
-            });
-          }); */
-        },
-      });
-    }
-  }, [room]);
-
-  return (
-    <div
-      className="experience"
-      ref={experienceRef}
-      /* asscroll-container="true" */
-    ></div>
-  );
+  return <div className="experience" ref={experienceRef}></div>;
 }
 
 export default Canvas;

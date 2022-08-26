@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Page.css";
 import ToggleBar from "./ToggleBar";
+import { useStateValue } from "./StateProvider";
 import GSAP from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 
@@ -10,90 +11,36 @@ function useArrayRef() {
   return [refs, (ref) => ref && refs.current.push(ref)];
 }
 
-function Page({ pageRef }) {
-  /* const sectionRef = useRef(null); */
-  /* const sections = []; */
+function Page({ roomObject }) {
+  const [{ reduxSections }, dispatch] = useStateValue();
+
+  const [room, setRoom] = useState({});
+
+  useEffect(() => {
+    setRoom(roomObject.scene);
+  });
+
+  const create_sections = (section) => {
+    dispatch({
+      type: "create_sections",
+      section: section,
+    });
+  };
+
   const [sections, setSection] = useArrayRef();
-  const progressWrapperRef = useRef(null);
-  const progressBarRef = useRef(null);
 
   useEffect(() => {
     GSAP.registerPlugin(ScrollTrigger);
 
-    ScrollTrigger.matchMedia({
-      // all
-      all: function () {
-        // ScrollTriggers created here aren't associated with a particular media query,
-        // so they persist.
-        sections.current.forEach((section) => {
-          const progressWrapper = section.children[0].children[0];
-          const progressBar = progressWrapper.children[0];
-          console.log(progressBar);
-
-          if (section.classList.contains("right")) {
-            GSAP.to(section, {
-              borderTopLeftRadius: 10,
-              scrollTrigger: {
-                trigger: section,
-                start: "top bottom",
-                end: "top top",
-                scrub: 0.6,
-                markers: true,
-              },
-            });
-            GSAP.to(section, {
-              borderBottomLeftRadius: 700,
-              scrollTrigger: {
-                trigger: section,
-                start: "bottom bottom",
-                end: "bottom top",
-                scrub: 0.6,
-                markers: true,
-              },
-            });
-          } else {
-            GSAP.to(section, {
-              borderTopRightRadius: 10,
-              scrollTrigger: {
-                trigger: section,
-                start: "top bottom",
-                end: "top top",
-                scrub: 0.6,
-                markers: true,
-              },
-            });
-            GSAP.to(section, {
-              borderBottomRightRadius: 700,
-              scrollTrigger: {
-                trigger: section,
-                start: "bottom bottom",
-                end: "bottom top",
-                scrub: 0.6,
-                markers: true,
-              },
-            });
-          }
-
-          GSAP.from(progressBar, {
-            scaleY: 0,
-            scrollTrigger: {
-              trigger: section,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.4,
-              pin: progressWrapper,
-              pinSpacing: false,
-            },
-          });
-        });
-      },
+    sections.current.forEach((section) => {
+      create_sections(section);
     });
-  }, [sections]);
+  }, []);
 
   return (
     <div className="page">
       <ToggleBar />
-      <div className="page-wrapper" asscroll="true" ref={pageRef}>
+      <div className="page-wrapper" asscroll="true">
         <section className="hero">
           <div className="hero-wrapper">
             <div className="hero-main hero-bottom">
@@ -110,15 +57,13 @@ function Page({ pageRef }) {
 
         <div className="first-margin section-margin"></div>
 
-        <section className="about-section section left" ref={setSection}>
-          <div
-            className="progress-wrapper progress-bar-wrapper-left"
-            ref={progressWrapperRef}
-          >
-            <div
-              className="progress-bar pink-background"
-              ref={progressBarRef}
-            ></div>
+        <section
+          className="about-section section left"
+          ref={setSection}
+          key={0}
+        >
+          <div className="progress-wrapper progress-bar-wrapper-left">
+            <div className="progress-bar pink-background"></div>
           </div>
           <div className="section-header">
             <div className="header-top">
@@ -158,15 +103,13 @@ function Page({ pageRef }) {
 
         <div className="second-margin section-margin"></div>
 
-        <section className="works-section section right" ref={setSection}>
-          <div
-            className="progress-wrapper progress-bar-wrapper-right"
-            ref={progressWrapperRef}
-          >
-            <div
-              className="progress-bar green-background"
-              ref={progressBarRef}
-            ></div>
+        <section
+          className="works-section section right"
+          ref={setSection}
+          key={1}
+        >
+          <div className="progress-wrapper progress-bar-wrapper-right">
+            <div className="progress-bar green-background"></div>
           </div>
           <div className="section-header">
             <div className="header-top">
@@ -206,7 +149,11 @@ function Page({ pageRef }) {
 
         <div className="third-margin section-margin"></div>
 
-        <section className="works-section section left" ref={setSection}>
+        <section
+          className="works-section section left"
+          ref={setSection}
+          key={2}
+        >
           <div className="progress-wrapper progress-bar-wrapper-left">
             <div className="progress-bar green-background"></div>
           </div>
@@ -231,7 +178,11 @@ function Page({ pageRef }) {
 
         <div className="fourth-margin section-margin"></div>
 
-        <section className="contact-section section left" ref={setSection}>
+        <section
+          className="contact-section section left"
+          ref={setSection}
+          key={3}
+        >
           <div className="progress-wrapper progress-bar-wrapper-left">
             <div className="progress-bar blue-background"></div>
           </div>
@@ -259,7 +210,11 @@ function Page({ pageRef }) {
 
         <div className="fifth-margin section-margin"></div>
 
-        <section className="finally-section section right" ref={setSection}>
+        <section
+          className="finally-section section right"
+          ref={setSection}
+          key={4}
+        >
           <div className="progress-wrapper progress-bar-wrapper-right">
             <div className="progress-bar cream-background"></div>
           </div>
