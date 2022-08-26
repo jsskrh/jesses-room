@@ -95,7 +95,6 @@ function Canvas({ ready, items, roomObject }) {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       const canvas = renderer.domElement;
       experienceRef.current.appendChild(canvas);
-      /* canvas.setAttribute("asscroll", "true"); */
 
       // SCENE
       const scene = new THREE.Scene();
@@ -224,7 +223,7 @@ function Canvas({ ready, items, roomObject }) {
         }
 
         // Fix computer name
-        if (child.name === "Montor") {
+        if (child.name === "Monitor") {
           child.children[1].material = new THREE.MeshBasicMaterial({
             map: items.screen,
           });
@@ -358,8 +357,8 @@ function Canvas({ ready, items, roomObject }) {
       monitorLight.add(rectLightHelper);
 
       /* gui.add(obj, "intensity", 0, 10).onChange(() => {
-sunLight.intesity = obj.intesity;
-}); */
+        sunLight.intesity = obj.intesity;
+      }); */
       /* const grid = new THREE.GridHelper(20, 20);
       scene.add(grid); */
 
