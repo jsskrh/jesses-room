@@ -13,6 +13,8 @@ function Canvas({ ready, items, roomObject }) {
 
   const [room, setRoom] = useState({});
 
+  const roomChildren = {};
+
   useEffect(() => {
     if (ready) {
       setRoom(roomObject.scene);
@@ -23,27 +25,6 @@ function Canvas({ ready, items, roomObject }) {
     dispatch({
       type: "create_camera",
       camera: camera,
-    });
-  };
-
-  const create_monitor_light = (monitorLight) => {
-    dispatch({
-      type: "create_monitor_light",
-      monitorLight: monitorLight,
-    });
-  };
-
-  const create_tank_light = (tankLight) => {
-    dispatch({
-      type: "create_tank_light",
-      tankLight: tankLight,
-    });
-  };
-
-  const create_lamp_light = (lampLight) => {
-    dispatch({
-      type: "create_lamp_light",
-      lampLight: lampLight,
     });
   };
 
@@ -65,6 +46,13 @@ function Canvas({ ready, items, roomObject }) {
     dispatch({
       type: "create_circle_third",
       circleThird: circleThird,
+    });
+  };
+
+  const create_room_children = (roomChildren) => {
+    dispatch({
+      type: "create_room_children",
+      roomChildren: roomChildren,
     });
   };
 
@@ -209,7 +197,8 @@ function Canvas({ ready, items, roomObject }) {
       // ROOM
       const actualRoom = roomObject.scene;
       scene.add(actualRoom);
-      actualRoom.scale.set(0.11, 0.11, 0.11);
+      actualRoom.scale.set(0.0, 0.0, 0.0);
+      actualRoom.position.y = 1;
       actualRoom.children.forEach((child) => {
         child.castShadow = true;
         child.receiveShadow = true;
@@ -268,6 +257,22 @@ function Canvas({ ready, items, roomObject }) {
         ) {
           child.scale.set(0, 0, 0);
         }
+        child.scale.set(0, 0, 0);
+        /* if (
+          child.name === "Wall" ||
+          child.name === "Cube" ||
+          child.name === "Floor"
+        ) {
+          child.scale.set(1, 1, 1);
+        } */
+        if (child.name === "Room_Cube") {
+          /* child.scale.set(1, 1, 1); */
+          child.scale.set(0, 0, 0);
+          child.position.set(0, -1.5, 0);
+          child.rotation.y = Math.PI / 4;
+        }
+
+        roomChildren[child.name.toLowerCase()] = child;
       });
       window.addEventListener("mousemove", (e) => {
         let rotation =
@@ -299,21 +304,21 @@ function Canvas({ ready, items, roomObject }) {
       monitorLight.position.set(-7.1, 8.3, -3.6);
       /* monitorLight.position.set(-9.56, 8.3, -1); */
       monitorLight.rotation.y = (Math.PI / 4) * 5;
-      create_monitor_light(monitorLight);
+      roomChildren["monitorLight"] = monitorLight;
       /* actualRoom.add(monitorLight); */
 
       const tankLight = new THREE.RectAreaLight(0xffffff, 0, 0.5, 1.015);
       tankLight.position.set(9.08244, 7.2, -0.510353);
       tankLight.rotation.x = -Math.PI / 2;
       tankLight.rotation.z = Math.PI / 4;
-      create_tank_light(tankLight);
+      roomChildren["tankLight"] = tankLight;
       //actualRoom.add(tankLight);
 
       const lampLight = new THREE.RectAreaLight(0xffffff, 0, 0.1, 0.1);
       lampLight.position.set(-8.72089, 1.215046, 13.5548);
       lampLight.rotation.x = -Math.PI / 2;
       lampLight.rotation.z = Math.PI / 4;
-      create_lamp_light(lampLight);
+      roomChildren["lampLight"] = lampLight;
       //actualRoom.add(lampLight);
 
       // DARK THEME
@@ -462,6 +467,8 @@ function Canvas({ ready, items, roomObject }) {
         mixer.update(delta * 0.009); */
         renderer.render(scene, orthographicCamera);
       };
+
+      create_room_children(roomChildren);
 
       let onWindowResize = function () {
         orthographicCamera.left =

@@ -25,24 +25,6 @@ const reducer = (state, action) => {
         camera: action.camera,
       };
 
-    case "create_monitor_light":
-      return {
-        ...state,
-        monitorLight: action.monitorLight,
-      };
-
-    case "create_tank_light":
-      return {
-        ...state,
-        tankLight: action.tankLight,
-      };
-
-    case "create_lamp_light":
-      return {
-        ...state,
-        lampLight: action.lampLight,
-      };
-
     case "create_circle_first":
       return {
         ...state,
@@ -61,6 +43,12 @@ const reducer = (state, action) => {
         circleThird: action.circleThird,
       };
 
+    case "create_room_children":
+      return {
+        ...state,
+        roomChildren: action.roomChildren,
+      };
+
     default:
       return state;
   }
@@ -70,12 +58,10 @@ export const initialState = {
   theme: false,
   reduxSections: [],
   camera: {},
-  monitorLight: {},
-  tankLight: {},
-  lampLight: {},
   circleFirst: {},
   circleSecond: {},
   circleThird: {},
+  roomChildren: {},
 };
 
 export default reducer;

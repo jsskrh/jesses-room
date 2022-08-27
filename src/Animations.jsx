@@ -3,28 +3,523 @@ import GSAP from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useStateValue } from "./StateProvider";
 import { useState } from "react";
+import { useMediaQuery } from "react-responsive";
 
 function Animations({ ready, roomObject, children }) {
   const [
     {
       reduxSections,
       camera,
-      monitorLight,
-      lampLight,
-      tankLight,
       circleFirst,
       circleSecond,
       circleThird,
+      roomChildren,
     },
   ] = useStateValue();
 
   const [room, setRoom] = useState({});
+  const [roomScales, setRoomScales] = useState({});
+  const [viewPort, setViewPort] = useState({});
+
+  const isMobile = useMediaQuery({ query: "(max-width: 968px" });
 
   useEffect(() => {
     if (ready) {
       setRoom(roomObject.scene);
     }
   });
+
+  const firstIntro = () => {
+    const actualRoom = room;
+    console.log("first intro", roomChildren);
+    return new Promise((resolve, reject) => {
+      const timeline = new GSAP.timeline();
+
+      GSAP.registerPlugin(ScrollTrigger);
+
+      ScrollTrigger.matchMedia({
+        "(min-width: 969px)": () => {
+          timeline
+            .to(actualRoom.scale, {
+              x: 0.017,
+              y: 0.017,
+              z: 0.017,
+              ease: "back.out(2.5)",
+              duration: 0.7,
+            })
+            .to(actualRoom.position, {
+              x: -1,
+              ease: "power1.out",
+              onComplete: resolve,
+            });
+        },
+
+        "(max-width: 968px)": () => {
+          timeline
+            .to(actualRoom.scale, {
+              x: 0.017,
+              y: 0.017,
+              z: 0.017,
+              ease: "back.out(2.5)",
+              duration: 0.7,
+            })
+            .to(actualRoom.position, {
+              z: -1,
+              ease: "power1.out",
+              onComplete: resolve,
+            });
+        },
+      });
+    });
+  };
+
+  const secondIntro = () => {
+    console.log("second intro");
+    const actualRoom = room;
+
+    new Promise((resolve, reject) => {
+      const timeline = new GSAP.timeline();
+
+      const first = GSAP.to(actualRoom.position, {
+        x: 0,
+        y: 0,
+        z: 0,
+        ease: "power1.out",
+        duration: 0.7,
+      });
+
+      const second = GSAP.to(actualRoom.rotation, {
+        y: 2 * Math.PI,
+        duration: 0.7,
+      });
+
+      // fix mobile room sixe 0.07
+      /* let third;
+      if (isMobile) {
+        third = GSAP.to(actualRoom.scale, {
+          x: 0.07,
+          y: 0.07,
+          z: 0.07,
+          duration: 0.7,
+        });
+      } else {
+        third = GSAP.to(actualRoom.scale, {
+          x: 0.07,
+          y: 0.07,
+          z: 0.07,
+          duration: 0.7,
+        });
+      } */
+      const third = GSAP.to(actualRoom.scale, {
+        x: 0.11,
+        y: 0.11,
+        z: 0.11,
+        duration: 0.7,
+      });
+
+      const fifth = GSAP.to(roomChildren.cube.scale, {
+        x: 0,
+        y: 0,
+        z: 0,
+        duration: 0.75,
+      });
+
+      const sixth = GSAP.to(roomChildren.table.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const seventh = GSAP.to(roomChildren.mini_table.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighth = GSAP.to(roomChildren.aquarium.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const ninth = GSAP.to(roomChildren.mat.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const tenth = GSAP.to(roomChildren.drawers.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eleventh = GSAP.to(roomChildren.trash_can.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twelfth = GSAP.to(
+        roomChildren.chair_legs.scale,
+        {
+          x: 1,
+          y: 1,
+          z: 1,
+          ease: "back.out(2.2)",
+          duration: 0.5,
+        }
+        /* "chair" */
+      );
+
+      const thirteenth = GSAP.to(
+        roomChildren.chair.scale,
+        {
+          x: 1,
+          y: 1,
+          z: 1,
+          ease: "back.out(2.2)",
+          duration: 0.5,
+        }
+        /* "chair" */
+      );
+
+      const fourteenth = GSAP.to(
+        roomChildren.chair.rotation,
+        {
+          y: 4 * Math.PI + (6 * Math.PI) / 4,
+          ease: "power2.out",
+          duration: 1,
+        }
+        /* "chair" */
+      );
+
+      const fifteenth = GSAP.to(roomChildren.table_top.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const sixteenth = GSAP.to(roomChildren.monitor.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const seventeenth = GSAP.to(roomChildren.keyboard.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighteenth = GSAP.to(roomChildren.macbook_stand.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const ninteenth = GSAP.to(roomChildren.mouse_pad.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentieth = GSAP.to(roomChildren.mug.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentyFirst = GSAP.to(roomChildren.flower_pot.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentySecond = GSAP.to(roomChildren.macbook.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentyThird = GSAP.to(roomChildren.paintings.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentyFourth = GSAP.to(roomChildren.paintings002.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentyFifth = GSAP.to(roomChildren.paintings004.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentySixth = GSAP.to(roomChildren.clock.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentySeventh = GSAP.to(roomChildren.shelf001.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentyEighth = GSAP.to(roomChildren.shelf002.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const twentyNinth = GSAP.to(roomChildren.shelf_lamp.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtieth = GSAP.to(roomChildren.table_book.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtyFirst = GSAP.to(roomChildren.table_book001.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtySecond = GSAP.to(roomChildren.shelf_book.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtyThird = GSAP.to(roomChildren.shelf_box.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtyFourth = GSAP.to(roomChildren.shelf_book001.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtyFifth = GSAP.to(roomChildren.shelf_book003.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtySixth = GSAP.to(roomChildren.shelf_book004.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtySeventh = GSAP.to(roomChildren.shelf_book005.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtyEighth = GSAP.to(roomChildren.shelf_book002.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const thirtyNinth = GSAP.to(roomChildren.fish.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+        onComplete: resolve,
+      });
+
+      timeline.add(first, "start");
+      timeline.add(second, "start");
+      timeline.add(third, "start");
+      timeline.add(fifth, ">+=0.1");
+      timeline.add(sixth);
+      timeline.add(seventh, "-=0.1");
+      timeline.add(eighth, "-=0.1");
+      timeline.add(ninth, "-=0.1");
+      timeline.add(tenth, "-=0.15");
+      timeline.add(eleventh, "-=0.15");
+      timeline.add(twelfth, "chairKeyboard");
+      timeline.add(thirteenth, "chairKeyboard");
+      timeline.add(fourteenth, "chairKeyboard");
+      timeline.add(fifteenth, "chairKeyboard-=0.2");
+      timeline.add(sixteenth, ">");
+      timeline.add(seventeenth, "chairKeyboard");
+      timeline.add(eighteenth, "-=0.1");
+      timeline.add(ninteenth, "-=0.1");
+      timeline.add(twentieth, "chairKeyboard+=1");
+      timeline.add(twentyFirst, "<+=0.1");
+      timeline.add(twentySecond, "<+=0.1");
+      timeline.add(twentyThird, "chairKeyboard+=0.3");
+      timeline.add(twentyFourth, ">-=0.3");
+      timeline.add(twentyFifth, ">-=0.3");
+      timeline.add(twentySixth, ">-=0.3");
+      timeline.add(twentySeventh, "chairKeyboard+=0.2");
+      timeline.add(twentyEighth, "<+=0.2");
+      timeline.add(twentyNinth, "<+=0.1");
+      timeline.add(thirtieth, "<+=0.1");
+      timeline.add(thirtyFirst, "<+=0.1");
+      timeline.add(thirtySecond, "<+=0.1");
+      timeline.add(thirtyThird, "<+=0.1");
+      timeline.add(thirtyFourth, "<+=0.1");
+      timeline.add(thirtyFifth, "<+=0.1");
+      timeline.add(thirtySixth, "<+=0.1");
+      timeline.add(thirtySeventh, "<+=0.1");
+      timeline.add(thirtyEighth, "<+=0.1");
+      timeline.add(thirtyNinth, "<+=0.1");
+    });
+  };
+
+  const onScroll = (e) => {
+    if (e.deltaY > 0) {
+      console.log("scrolled");
+      /* window.removeEventListener("wheel", onScroll); */
+      removeEventListeners();
+      playSecondIntro();
+    }
+  };
+
+  const onTouch = (e) => {
+    let initialY = e.touches[0].clientY;
+  };
+
+  const onTouchMove = (e) => {
+    let currentY = e.touches[0].clientY;
+    let difference = initialY - currentY;
+    if (difference > 0) {
+      console.log(swipped);
+      removeEventListeners();
+      playSecondIntro();
+    }
+    initialY = null;
+  };
+
+  const removeEventListeners = () => {
+    window.removeEventListener("wheel", onScroll);
+    /*  window.removeEventListener("touchStart", onTouchStart); */
+    /* window.removeEventListener("touchMove", onTouchMove); */
+  };
+
+  // fix touch event
+  const playFirstIntro = async () => {
+    await firstIntro();
+    window.addEventListener("wheel", onScroll);
+    /* window.addEventListener("touchStart", onTouch);
+    window.addEventListener("touchMove", onTouchMove); */
+  };
+
+  const playSecondIntro = async () => {
+    await secondIntro();
+  };
+
+  useEffect(() => {
+    if (ready) {
+      playFirstIntro();
+    }
+  }, [room]);
+
+  /* useEffect(() => {
+    let onWindowResize = function () { */
+  /* console.log(viewPort); */
+  /* console.log(roomScales);
+      if (window.innerWidth > 968) {
+        setRoomScales({
+          roomScaleX: 0.11,
+          roomScaleY: 0.11,
+          roomScaleZ: 0.11,
+        });
+      } else {
+        setRoomScales({
+          roomScaleX: 0.07,
+          roomScaleY: 0.07,
+          roomScaleZ: 0.07,
+        });
+      } */
+
+  /* isMobile && console.log("mobile"); */
+  /* setViewPort({ desktop: window.innerWidth > 968 }); */
+  /* }; */
+
+  /* window.addEventListener("resize", onWindowResize, false);
+  }); */
 
   useEffect(() => {
     if (ready) {
@@ -36,13 +531,16 @@ function Animations({ ready, roomObject, children }) {
       ScrollTrigger.matchMedia({
         // Desktop
         "(min-width: 969px)": () => {
-          actualRoom.scale.set(0.11, 0.11, 0.11);
-          //monitorLight.width = 0.724;
-          //monitorLight.height = 0.3515;
-          //tankLight.width = 0.5;
-          //tankLight.height = 1.015;
-          //lampLight.width = 0.1;
-          //lampLight.height = 0.1;
+          actualRoom.scale.set(0, 0, 0);
+          roomChildren.wall.scale.set(1, 1, 1);
+          roomChildren.cube.scale.set(1, 1, 1);
+          roomChildren.floor.scale.set(1, 1, 1);
+          //roomChildren.monitorLight.width = 0.724;
+          //roomChildren.monitorLight.height = 0.3515;
+          //roomChildren.tankLight.width = 0.5;
+          //roomChildren.tankLight.height = 1.015;
+          //roomChildren.lampLight.width = 0.1;
+          //roomChildren.lampLight.height = 0.1;
 
           // First Section
           const firstMoveTimeline = new GSAP.timeline({
@@ -93,7 +591,7 @@ function Animations({ ready, roomObject, children }) {
               "same"
             );
           //.to(
-          //  monitorLight,
+          //  roomChildren.monitorLight,
           //  {
           //    width: 0.724 * 4,
           //    height: 0.3515 * 4,
@@ -164,7 +662,7 @@ function Animations({ ready, roomObject, children }) {
               "same"
             )
             //.to(
-            //  monitorLight,
+            //  roomChildren.monitorLight,
             //  {
             //    width: 0.724,
             //    height: 0.3515,
@@ -186,14 +684,21 @@ function Animations({ ready, roomObject, children }) {
         // touch up camera positioning on the third to fifth sections
         "(max-width: 968px)": () => {
           // Room in mobile
-          actualRoom.scale.set(0.07, 0.07, 0.07);
+          /* actualRoom.scale.set(0.07, 0.0, 0.0); */
+          /* roomChildren.wall.scale.set(0.4, 0.4, 0.4);
+          roomChildren.cube.scale.set(0.6364, 0.6364, 0.6364);
+          roomChildren.floor.scale.set(0.6364, 0.6364, 0.6364); */
+          /* actualRoom.scale.set(0.07, 0.07, 0.07); */
+          roomChildren.wall.scale.set(1, 1, 1);
+          roomChildren.cube.scale.set(1, 1, 1);
+          roomChildren.floor.scale.set(1, 1, 1);
           actualRoom.position.set(-0.05, 0, 0);
-          //monitorLight.width = 0.4607;
-          //monitorLight.height = 0.2237;
-          //tankLight.width = 0.3181;
-          //tankLight.height = 0.6459;
-          //lampLight.width = 0.0636;
-          //lampLight.height = 0.0636;
+          //roomChildren.monitorLight.width = 0.4607;
+          //roomChildren.monitorLight.height = 0.2237;
+          //roomChildren.tankLight.width = 0.3181;
+          //roomChildren.tankLight.height = 0.6459;
+          //roomChildren.lampLight.width = 0.0636;
+          //roomChildren.lampLight.height = 0.0636;
 
           // First Section
           const firstMoveTimeline = new GSAP.timeline({
@@ -246,7 +751,7 @@ function Animations({ ready, roomObject, children }) {
               "same"
             );
           //.to(
-          //  monitorLight,
+          //  roomChildren.monitorLight,
           //  {
           //    width: 0.724 * 3.4,
           //    height: 0.3515 * 3.4,
@@ -314,7 +819,7 @@ function Animations({ ready, roomObject, children }) {
               "same"
             )
             //.to(
-            //  monitorLight,
+            //  roomChildren.monitorLight,
             //  {
             //    width: 0.724,
             //    height: 0.3515,
@@ -336,6 +841,9 @@ function Animations({ ready, roomObject, children }) {
         all: function () {
           // ScrollTriggers created here aren't associated with a particular media query,
           // so they persist.
+
+          /* playIntro(); */
+
           // Mini platform animation
           const secondPartTimeline = new GSAP.timeline({
             scrollTrigger: {
@@ -355,97 +863,77 @@ function Animations({ ready, roomObject, children }) {
           let eigth;
           let ninth;
 
-          actualRoom.children.forEach((child) => {
-            if (child.name === "Floor") {
-              first = GSAP.to(child.position, {
-                x: 3.07688,
-                z: 2.66616,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            // set origin to bottom
-            if (child.name === "Mailbox") {
-              second = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Lamp") {
-              third = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad001") {
-              fourth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad002") {
-              fifth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Floor_Pad003") {
-              sixth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower_Pad") {
-              seventh = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower001") {
-              eigth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
-
-            if (child.name === "Flower002") {
-              ninth = GSAP.to(child.scale, {
-                x: 1,
-                y: 1,
-                z: 1,
-                ease: "back.out(2)",
-                duration: 0.3,
-              });
-            }
+          first = GSAP.to(roomChildren.floor.position, {
+            x: 3.07688,
+            z: 2.66616,
+            ease: "back.out(2)",
+            duration: 0.3,
           });
+
+          second = GSAP.to(roomChildren.mailbox.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            ease: "back.out(2)",
+            duration: 0.3,
+          });
+
+          third = GSAP.to(roomChildren.lamp.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            ease: "back.out(2)",
+            duration: 0.3,
+          });
+
+          fourth = GSAP.to(roomChildren.floor_pad001.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            ease: "back.out(2)",
+            duration: 0.3,
+          });
+
+          fifth = GSAP.to(roomChildren.floor_pad002.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            ease: "back.out(2)",
+            duration: 0.3,
+          });
+
+          sixth = GSAP.to(roomChildren.floor_pad003.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            ease: "back.out(2)",
+            duration: 0.3,
+          });
+
+          seventh = GSAP.to(roomChildren.flower_pad.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            ease: "back.out(2)",
+            duration: 0.3,
+          });
+
+          eigth = GSAP.to(roomChildren.flower001.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            ease: "back.out(2)",
+            duration: 0.3,
+          });
+
+          ninth = GSAP.to(roomChildren.flower002.scale, {
+            x: 1,
+            y: 1,
+            z: 1,
+            ease: "back.out(2)",
+            duration: 0.3,
+          });
+
           secondPartTimeline.add(first);
           secondPartTimeline.add(second);
           secondPartTimeline.add(third);

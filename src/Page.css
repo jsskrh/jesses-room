@@ -252,8 +252,8 @@
     width: 100%;
   }
 
-  .progress-bar-wrapper-left {
+  /* .progress-bar-wrapper-left {
     right: 0;
     left: auto;
-  }
+  } */
 }
