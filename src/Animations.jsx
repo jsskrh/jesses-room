@@ -48,7 +48,7 @@ function Animations({ ready, roomObject, children }) {
               duration: 0.7,
             })
             .to(actualRoom.position, {
-              x: -1,
+              x: -1.35,
               ease: "power1.out",
               onComplete: resolve,
             });
@@ -114,6 +114,11 @@ function Animations({ ready, roomObject, children }) {
         x: 0.11,
         y: 0.11,
         z: 0.11,
+        duration: 0.7,
+      });
+
+      const fourth = GSAP.to(roomChildren.planeFloor.position, {
+        y: -0.4,
         duration: 0.7,
       });
 
@@ -410,6 +415,7 @@ function Animations({ ready, roomObject, children }) {
       timeline.add(first, "start");
       timeline.add(second, "start");
       timeline.add(third, "start");
+      timeline.add(fourth, "start");
       timeline.add(fifth, ">+=0.1");
       timeline.add(sixth);
       timeline.add(seventh, "-=0.1");
