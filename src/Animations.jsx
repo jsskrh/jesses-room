@@ -14,6 +14,7 @@ function Animations({ ready, roomObject, children }) {
       circleSecond,
       circleThird,
       roomChildren,
+      textRefs,
     },
   ] = useStateValue();
 
@@ -26,6 +27,7 @@ function Animations({ ready, roomObject, children }) {
   useEffect(() => {
     if (ready) {
       setRoom(roomObject.scene);
+      console.log(textRefs);
     }
   });
 
@@ -50,7 +52,6 @@ function Animations({ ready, roomObject, children }) {
             .to(actualRoom.position, {
               x: -1.35,
               ease: "power1.out",
-              onComplete: resolve,
             });
         },
 
@@ -66,8 +67,16 @@ function Animations({ ready, roomObject, children }) {
             .to(actualRoom.position, {
               z: -1,
               ease: "power1.out",
-              onComplete: resolve,
             });
+        },
+
+        all: () => {
+          timeline.to(".intro-text .animate-this", {
+            yPercent: -100,
+            stagger: 0.05,
+            ease: "back.out(1.7)",
+            onComplete: resolve,
+          });
         },
       });
     });
@@ -79,6 +88,12 @@ function Animations({ ready, roomObject, children }) {
 
     new Promise((resolve, reject) => {
       const timeline = new GSAP.timeline();
+
+      const zero = GSAP.to(".intro-text .animate-this", {
+        yPercent: 100,
+        stagger: 0.05,
+        ease: "back.in(1.7)",
+      });
 
       const first = GSAP.to(actualRoom.position, {
         x: 0,
@@ -110,6 +125,7 @@ function Animations({ ready, roomObject, children }) {
           duration: 0.7,
         });
       } */
+
       const third = GSAP.to(actualRoom.scale, {
         x: 0.11,
         y: 0.11,
@@ -409,9 +425,37 @@ function Animations({ ready, roomObject, children }) {
         z: 1,
         ease: "back.out(2.2)",
         duration: 0.5,
+      });
+
+      const fourtieth = GSAP.to(".hero-main-title .animate-this", {
+        yPercent: -100,
+        stagger: 0.05,
+        ease: "back.out(1.7)",
         onComplete: resolve,
       });
 
+      const fourtyFirst = GSAP.to(".hero-main-description .animate-this", {
+        yPercent: -100,
+        stagger: 0.05,
+        ease: "back.out(1.7)",
+        onComplete: resolve,
+      });
+
+      const fourtySecond = GSAP.to(".hero-main-subheading-one .animate-this", {
+        yPercent: -100,
+        stagger: 0.05,
+        ease: "back.out(1.7)",
+        onComplete: resolve,
+      });
+
+      const fourtyThird = GSAP.to(".hero-main-subheading-two .animate-this", {
+        yPercent: -100,
+        stagger: 0.05,
+        ease: "back.out(1.7)",
+        onComplete: resolve,
+      });
+
+      timeline.add(zero);
       timeline.add(first, "start");
       timeline.add(second, "start");
       timeline.add(third, "start");
@@ -451,6 +495,10 @@ function Animations({ ready, roomObject, children }) {
       timeline.add(thirtySeventh, "<+=0.1");
       timeline.add(thirtyEighth, "<+=0.1");
       timeline.add(thirtyNinth, "<+=0.1");
+      timeline.add(fourtieth, ">-=0.1");
+      timeline.add(fourtyFirst, "<+=0.2");
+      timeline.add(fourtySecond, "<+=0.2");
+      timeline.add(fourtyThird, "<+=0.2");
     });
   };
 

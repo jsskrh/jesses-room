@@ -49,6 +49,12 @@ const reducer = (state, action) => {
         roomChildren: action.roomChildren,
       };
 
+    case "create_text_refs":
+      return {
+        ...state,
+        textRefs: action.textRefs,
+      };
+
     default:
       return state;
   }
@@ -62,6 +68,7 @@ export const initialState = {
   circleSecond: {},
   circleThird: {},
   roomChildren: {},
+  textRefs: {},
 };
 
 export default reducer;

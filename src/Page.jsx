@@ -16,6 +16,38 @@ function Page({ roomObject }) {
 
   const [room, setRoom] = useState({});
 
+  const hmTitleRef = useRef();
+  const hmDescRef = useRef();
+  const introTextRef = useRef();
+  const hmSubOne = useRef();
+  const hmSubTwo = useRef();
+
+  let textRefObj = {};
+
+  const create_text_refs = (textRefs) => {
+    dispatch({
+      type: "create_text_refs",
+      textRefs: textRefs,
+    });
+  };
+
+  const textLoader = (ref) => {
+    const element = ref.current;
+    textRefObj[element.className] = element;
+    element.style.overflow = "hidden";
+    element.innerHTML = element.innerText
+      .split("")
+      .map((char) => {
+        if (char === " ") {
+          return `<span>${char}</span>`;
+        }
+        return `<span class="animate-this">${char}</span>`;
+      })
+      .join("");
+
+    return element;
+  };
+
   useEffect(() => {
     setRoom(roomObject.scene);
   });
@@ -30,6 +62,14 @@ function Page({ roomObject }) {
   const [sections, setSection] = useArrayRef();
 
   useEffect(() => {
+    textLoader(introTextRef);
+    textLoader(hmTitleRef);
+    textLoader(hmDescRef);
+    textLoader(hmSubOne);
+    textLoader(hmSubTwo);
+
+    create_text_refs(textRefObj);
+
     GSAP.registerPlugin(ScrollTrigger);
 
     sections.current.forEach((section) => {
@@ -43,14 +83,25 @@ function Page({ roomObject }) {
       <div className="page-wrapper" asscroll="true">
         <section className="hero">
           <div className="hero-wrapper">
+            <div className="intro-text" ref={introTextRef}>
+              Welcome to my portfolio!
+            </div>
             <div className="hero-main hero-bottom">
-              <h1 className="hero-main-title">Jesse K. Akorah</h1>
-              <p className="hero-main-description">Fullstack Developer</p>
+              <h1 className="hero-main-title" ref={hmTitleRef}>
+                Jesse K. Akorah
+              </h1>
+              <p className="hero-main-description" ref={hmDescRef}>
+                Fullstack Developer
+              </p>
             </div>
 
             <div className="hero-main hero-top">
-              <p className="hero-main-subheading">Jesse's Room</p>
-              <p className="hero-main-subheading">Portfolio</p>
+              <p className="hero-main-subheading-one" ref={hmSubOne}>
+                Jesse's Room
+              </p>
+              <p className="hero-main-subheading-two" ref={hmSubTwo}>
+                Portfolio
+              </p>
             </div>
           </div>
         </section>

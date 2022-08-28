@@ -5,6 +5,20 @@
   overflow: hidden;
 }
 
+.animate-this {
+  display: inline-block;
+  transform: translateY(100%);
+}
+
+.intro-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 500;
+  font-size: 16px;
+}
+
 .page-wrapper {
   position: relative;
 }
@@ -40,7 +54,8 @@
   font-size: 64px;
 }
 
-.hero-main-subheading {
+.hero-main-subheading-one,
+.hero-main-subheading-two {
   font-size: 36px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
