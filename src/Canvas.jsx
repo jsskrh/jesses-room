@@ -399,7 +399,7 @@ function Canvas({ ready, items, roomObject }) {
       });
       const plane = new THREE.Mesh(planeGeometry, planeMaterial);
       plane.rotation.x = Math.PI / 2;
-      plane.position.y = 0.95;
+      /* plane.position.y = 0.95; */
       /* plane.position.y = -0.4; */
       /* plane.material.color.setHex(0xfbf4e4); */
       /* plane.material.color.setHex(0x000000); */

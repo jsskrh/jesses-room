@@ -11,6 +11,7 @@ import { useStateValue } from "./StateProvider";
 import GSAP from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import ASScroll from "@ashthornton/asscroll";
+import Preloader from "./Preloader";
 
 function App() {
   const [{ theme }] = useStateValue();
@@ -142,6 +143,7 @@ function App() {
     >
       <Animations roomObject={room} ready={ready} items={items}>
         <Canvas ready={ready} items={items} roomObject={room} />
+        <Preloader />
         {ready && <Page roomObject={room} />}
       </Animations>
     </div>

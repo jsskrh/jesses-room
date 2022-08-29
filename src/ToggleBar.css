@@ -32,6 +32,10 @@
   box-shadow: 0 0 6px rgba(var(--color-black), 0.2);
 }
 
+.toggle-bar {
+  opacity: 0;
+}
+
 .toggle-button:hover .toggle-circle {
   transform: scale(0.9);
 }
