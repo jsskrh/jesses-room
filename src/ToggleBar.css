@@ -53,3 +53,36 @@
 .slide {
   left: 30px;
 }
+
+@media (max-width: 968px) {
+  .toggle-bar {
+    top: 2.5%;
+    right: 5.5%;
+  }
+
+  .toggle-button {
+    width: 48px;
+    height: 24px;
+    margin: 0 10px;
+  }
+
+  .toggle-circle {
+    left: 4px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .slide {
+    left: 29px;
+  }
+
+  .sun-container,
+  .moon-container {
+    height: 21px;
+    width: 21px;
+  }
+
+  .toggle-bar svg {
+    transform: scale(0.785);
+  }
+}

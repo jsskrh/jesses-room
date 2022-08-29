@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from "react";
 import "./ToggleBar.css";
 import { useStateValue } from "./StateProvider";
+import { useMediaQuery } from "react-responsive";
 
 function ToggleBar() {
   const [{ theme }, dispatch] = useStateValue();
+
+  const [size, setSize] = useState();
+
+  const isMobile = useMediaQuery({ query: "(max-width: 968px" });
 
   const toggleTheme = () => {
     dispatch({
       type: "toggle_theme",
     });
   };
+
+  useEffect(() => {
+    isMobile ? setSize("16") : setSize("24");
+  });
 
   return (
     <div className="toggle-bar">

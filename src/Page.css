@@ -73,8 +73,7 @@
   font-size: 64px;
 }
 
-.hero-main-subheading-one,
-.hero-main-subheading-two {
+.hero-main-subheading {
   font-size: 36px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -290,4 +289,24 @@
     right: 0;
     left: auto;
   } */
+
+  .hero-main {
+    bottom: 120px;
+  }
+
+  .hero-wrapper {
+    width: calc(100% - 60px);
+  }
+
+  .hero-main-title {
+    font-size: 36px;
+  }
+
+  .hero-main-description {
+    font-size: 17px;
+  }
+
+  .hero-main-subheading {
+    font-size: 27px;
+  }
 }
