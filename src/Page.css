@@ -1,8 +1,8 @@
 .page {
   z-index: 99999;
-  height: 100vh;
+  height: 100%;
   width: 100%;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .animate-this {
@@ -27,6 +27,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   animation: bounce 0.5s ease-in alternate infinite;
+  color: var(--color-text);
 }
 
 @keyframes bounce {
@@ -36,6 +37,10 @@
   100% {
     transform: translateY(8px);
   }
+}
+
+.arrow-svg-wrapper svg {
+  transform: scale(0.7);
 }
 
 .page-wrapper {
@@ -280,6 +285,12 @@
   margin-top: 18px;
 }
 
+@media (min-width: 969px) {
+  .finally-section {
+    padding-bottom: 1500px;
+  }
+}
+
 @media (max-width: 968px) {
   .section {
     width: 100%;
@@ -294,19 +305,27 @@
     bottom: 120px;
   }
 
+  .hero-top {
+    top: 100px;
+  }
+
   .hero-wrapper {
     width: calc(100% - 60px);
   }
 
   .hero-main-title {
-    font-size: 36px;
+    font-size: 32px;
   }
 
   .hero-main-description {
-    font-size: 17px;
+    font-size: 15px;
   }
 
   .hero-main-subheading {
-    font-size: 27px;
+    font-size: 24px;
+  }
+
+  .arrow-svg-wrapper svg {
+    transform: scale(0.5);
   }
 }

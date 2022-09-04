@@ -9,6 +9,10 @@ body {
   background-color: var(--color-light-bg);
 }
 
+body {
+  overflow: hidden;
+}
+
 .App {
   color: var(--color-text);
   background-color: var(--color-bg);

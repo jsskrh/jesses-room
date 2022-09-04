@@ -36,58 +36,65 @@ function Animations({ ready, roomObject, children }) {
     console.log("first intro", roomChildren);
     return new Promise((resolve, reject) => {
       const timeline = new GSAP.timeline();
-
-      timeline.to(".preloader", {
-        opacity: 0,
-        delay: 1,
-        onComplete: () => {
-          document.querySelector(".preloader").classList.add("hidden");
-        },
-      });
+      timeline.set(".animate-this", { y: 0, yPercent: 100 });
+      timeline
+        .to(".preloader", {
+          opacity: 0,
+          delay: 1,
+          onComplete: () => {
+            document.querySelector(".preloader").classList.add("hidden");
+          },
+        })
+        /* .set(document.body, { overflow: "hidden" }) */
+        .to(actualRoom.scale, {
+          x: 0.017,
+          y: 0.017,
+          z: 0.017,
+          ease: "back.out(2.5)",
+          duration: 0.7,
+        });
 
       GSAP.registerPlugin(ScrollTrigger);
 
       ScrollTrigger.matchMedia({
         "(min-width: 969px)": () => {
           timeline
-            .to(actualRoom.scale, {
-              x: 0.017,
-              y: 0.017,
-              z: 0.017,
-              ease: "back.out(2.5)",
-              duration: 0.7,
-            })
             .to(actualRoom.position, {
               x: -1.35,
               ease: "power1.out",
+            })
+            .to(".hero", {
+              scrollTrigger: {
+                trigger: ".hero",
+                start: "top top",
+                //end: 800,
+                pin: true,
+              },
             });
         },
 
         "(max-width: 968px)": () => {
-          timeline
-            .to(actualRoom.scale, {
-              x: 0.017,
-              y: 0.017,
-              z: 0.017,
-              ease: "back.out(2.5)",
-              duration: 0.7,
-            })
-            .to(actualRoom.position, {
-              z: -2.7,
-              ease: "power1.out",
-              onComplete: () => {
-                console.log("test");
-              },
-            });
+          timeline.to(actualRoom.position, {
+            z: -2.7,
+            ease: "power1.out",
+          });
         },
 
         all: () => {
           timeline
             .to(".intro-text .animate-this", {
-              yPercent: -100,
+              yPercent: 0,
               stagger: 0.05,
               ease: "back.out(1.7)",
             })
+            /* .to(".hero", {
+              scrollTrigger: {
+                trigger: ".hero",
+                start: "top top",
+                //end: 800,
+                pin: true,
+              },
+            }) */
             .to(
               ".arrow-svg-wrapper",
               {
@@ -108,13 +115,12 @@ function Animations({ ready, roomObject, children }) {
     });
   };
 
+  const timeline = new GSAP.timeline({});
   const secondIntro = () => {
     console.log("second intro");
     const actualRoom = room;
 
     new Promise((resolve, reject) => {
-      const timeline = new GSAP.timeline();
-
       const zero = GSAP.to(".intro-text .animate-this", {
         yPercent: 100,
         stagger: 0.05,
@@ -126,9 +132,9 @@ function Animations({ ready, roomObject, children }) {
       });
 
       const first = GSAP.to(actualRoom.position, {
-        x: 0,
+        x: isMobile ? -0.1 : 0,
         y: 0,
-        z: 0,
+        z: isMobile ? -1 : 0,
         ease: "power1.out",
         duration: 0.7,
       });
@@ -138,28 +144,10 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.7,
       });
 
-      // fix mobile room sixe 0.07
-      /* let third;
-      if (isMobile) {
-        third = GSAP.to(actualRoom.scale, {
-          x: 0.07,
-          y: 0.07,
-          z: 0.07,
-          duration: 0.7,
-        });
-      } else {
-        third = GSAP.to(actualRoom.scale, {
-          x: 0.07,
-          y: 0.07,
-          z: 0.07,
-          duration: 0.7,
-        });
-      } */
-
       const third = GSAP.to(actualRoom.scale, {
-        x: 0.11,
-        y: 0.11,
-        z: 0.11,
+        x: isMobile ? 0.06 : 0.11,
+        y: isMobile ? 0.06 : 0.11,
+        z: isMobile ? 0.06 : 0.11,
         duration: 0.7,
       });
 
@@ -191,13 +179,13 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.5,
       });
 
-      const eighth = GSAP.to(roomChildren.aquarium.scale, {
+      /* const eighth = GSAP.to(roomChildren.book_shelf.scale, {
         x: 1,
         y: 1,
         z: 1,
         ease: "back.out(2.2)",
         duration: 0.5,
-      });
+      }); */
 
       const ninth = GSAP.to(roomChildren.mat.scale, {
         x: 1,
@@ -449,44 +437,45 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.5,
       });
 
-      const thirtyNinth = GSAP.to(roomChildren.fish.scale, {
+      /* const thirtyNinth = GSAP.to(roomChildren.fish.scale, {
         x: 1,
         y: 1,
         z: 1,
         ease: "back.out(2.2)",
         duration: 0.5,
-      });
+      }); */
 
       const fourtieth = GSAP.to(".hero-main-title .animate-this", {
-        yPercent: -100,
+        yPercent: 0,
         stagger: 0.05,
         ease: "back.out(1.7)",
       });
 
       const fourtyFirst = GSAP.to(".hero-main-description .animate-this", {
-        yPercent: -100,
+        yPercent: 0,
         stagger: 0.05,
         ease: "back.out(1.7)",
       });
 
       const fourtySecond = GSAP.to(".subheading-one .animate-this", {
-        yPercent: -100,
+        yPercent: 0,
         stagger: 0.05,
         ease: "back.out(1.7)",
       });
 
       const fourtyThird = GSAP.to(".subheading-two .animate-this", {
-        yPercent: -100,
+        yPercent: 0,
         stagger: 0.05,
         ease: "back.out(1.7)",
       });
 
       const fourtyFourth = GSAP.to(".arrow-svg-wrapper", {
         opacity: 1,
+        onComplete: resolve,
       });
 
-      const fourtyFifth = GSAP.set(".page", {
-        overflow: "visible",
+      const fourtyFifth = GSAP.set("body", {
+        overflow: "auto",
         onComplete: resolve,
       });
 
@@ -499,7 +488,7 @@ function Animations({ ready, roomObject, children }) {
       timeline.add(fifth, ">+=0.1");
       timeline.add(sixth);
       timeline.add(seventh, "-=0.1");
-      timeline.add(eighth, "-=0.1");
+      /* timeline.add(eighth, "-=0.1"); */
       timeline.add(ninth, "-=0.1");
       timeline.add(tenth, "-=0.15");
       timeline.add(eleventh, "-=0.15");
@@ -530,7 +519,7 @@ function Animations({ ready, roomObject, children }) {
       timeline.add(thirtySixth, "<+=0.1");
       timeline.add(thirtySeventh, "<+=0.1");
       timeline.add(thirtyEighth, "<+=0.1");
-      timeline.add(thirtyNinth, "<+=0.1");
+      /* timeline.add(thirtyNinth, "<+=0.1"); */
       timeline.add(fourtieth, ">-=0.1");
       timeline.add(fourtyFirst, "<+=0.2");
       timeline.add(fourtySecond, "<+=0.2");
@@ -584,35 +573,31 @@ function Animations({ ready, roomObject, children }) {
 
   useEffect(() => {
     if (ready) {
+      const actualRoom = room;
       playFirstIntro();
-      /* document.querySelector(".page").style.overflow = "visible"; */
+
+      window.addEventListener("resize", createAnimation);
+
+      function createAnimation() {
+        // record state of animation
+        const progress = timeline.progress();
+        const reversed = timeline.reversed();
+
+        console.log(progress, "progress");
+
+        // clear animation
+        /* timeline.progress(0).clear(); */
+
+        // create animation
+        timeline
+          .to(actualRoom, {})
+
+          // restore state of animation
+          .progress(progress);
+        /* .reversed(reversed); */
+      }
     }
   }, [room]);
-
-  /* useEffect(() => {
-    let onWindowResize = function () { */
-  /* console.log(viewPort); */
-  /* console.log(roomScales);
-      if (window.innerWidth > 968) {
-        setRoomScales({
-          roomScaleX: 0.11,
-          roomScaleY: 0.11,
-          roomScaleZ: 0.11,
-        });
-      } else {
-        setRoomScales({
-          roomScaleX: 0.07,
-          roomScaleY: 0.07,
-          roomScaleZ: 0.07,
-        });
-      } */
-
-  /* isMobile && console.log("mobile"); */
-  /* setViewPort({ desktop: window.innerWidth > 968 }); */
-  /* }; */
-
-  /* window.addEventListener("resize", onWindowResize, false);
-  }); */
 
   useEffect(() => {
     if (ready) {
@@ -811,6 +796,9 @@ function Animations({ ready, roomObject, children }) {
               x: 0.1,
               y: 0.1,
               z: 0.1,
+              onComplete: () => {
+                console.log("mobile test");
+              },
             },
             "same"
           );
@@ -948,7 +936,7 @@ function Animations({ ready, roomObject, children }) {
             },
           });
 
-          let first;
+          /* let first;
           let second;
           let third;
           let fourth;
@@ -956,16 +944,16 @@ function Animations({ ready, roomObject, children }) {
           let sixth;
           let seventh;
           let eigth;
-          let ninth;
+          let ninth; */
 
-          first = GSAP.to(roomChildren.floor.position, {
+          const first = GSAP.to(roomChildren.floor.position, {
             x: 3.07688,
             z: 2.66616,
             ease: "back.out(2)",
             duration: 0.3,
           });
 
-          second = GSAP.to(roomChildren.mailbox.scale, {
+          const second = GSAP.to(roomChildren.mailbox.scale, {
             x: 1,
             y: 1,
             z: 1,
@@ -973,7 +961,7 @@ function Animations({ ready, roomObject, children }) {
             duration: 0.3,
           });
 
-          third = GSAP.to(roomChildren.lamp.scale, {
+          const third = GSAP.to(roomChildren.lamp.scale, {
             x: 1,
             y: 1,
             z: 1,
@@ -981,7 +969,7 @@ function Animations({ ready, roomObject, children }) {
             duration: 0.3,
           });
 
-          fourth = GSAP.to(roomChildren.floor_pad001.scale, {
+          const fourth = GSAP.to(roomChildren.floor_pad001.scale, {
             x: 1,
             y: 1,
             z: 1,
@@ -989,7 +977,7 @@ function Animations({ ready, roomObject, children }) {
             duration: 0.3,
           });
 
-          fifth = GSAP.to(roomChildren.floor_pad002.scale, {
+          const fifth = GSAP.to(roomChildren.floor_pad002.scale, {
             x: 1,
             y: 1,
             z: 1,
@@ -997,7 +985,7 @@ function Animations({ ready, roomObject, children }) {
             duration: 0.3,
           });
 
-          sixth = GSAP.to(roomChildren.floor_pad003.scale, {
+          const sixth = GSAP.to(roomChildren.floor_pad003.scale, {
             x: 1,
             y: 1,
             z: 1,
@@ -1005,7 +993,7 @@ function Animations({ ready, roomObject, children }) {
             duration: 0.3,
           });
 
-          seventh = GSAP.to(roomChildren.flower_pad.scale, {
+          const seventh = GSAP.to(roomChildren.flower_pad.scale, {
             x: 1,
             y: 1,
             z: 1,
@@ -1013,7 +1001,7 @@ function Animations({ ready, roomObject, children }) {
             duration: 0.3,
           });
 
-          eigth = GSAP.to(roomChildren.flower001.scale, {
+          const eigth = GSAP.to(roomChildren.flower001.scale, {
             x: 1,
             y: 1,
             z: 1,
@@ -1021,7 +1009,7 @@ function Animations({ ready, roomObject, children }) {
             duration: 0.3,
           });
 
-          ninth = GSAP.to(roomChildren.flower002.scale, {
+          const ninth = GSAP.to(roomChildren.flower002.scale, {
             x: 1,
             y: 1,
             z: 1,
