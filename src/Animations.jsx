@@ -54,6 +54,8 @@ function Animations({ ready, roomObject, children }) {
           duration: 0.7,
         });
 
+      console.log(roomChildren);
+
       GSAP.registerPlugin(ScrollTrigger);
 
       ScrollTrigger.matchMedia({
@@ -163,6 +165,13 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.75,
       });
 
+      const fifthPointOne = GSAP.to(roomChildren.false_wall.scale, {
+        x: 0,
+        y: 0,
+        z: 0,
+        duration: 0.75,
+      });
+
       const sixth = GSAP.to(roomChildren.table.scale, {
         x: 1,
         y: 1,
@@ -179,13 +188,133 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.5,
       });
 
-      /* const eighth = GSAP.to(roomChildren.book_shelf.scale, {
+      const eighth = GSAP.to(roomChildren.book_shelf.scale, {
         x: 1,
         y: 1,
         z: 1,
         ease: "back.out(2.2)",
         duration: 0.5,
-      }); */
+      });
+
+      const eighthPointOne = GSAP.to(roomChildren.project.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointTwo = GSAP.to(roomChildren.project001.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointThree = GSAP.to(roomChildren.project002.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointFour = GSAP.to(roomChildren.project003.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointFive = GSAP.to(roomChildren.project004.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointSix = GSAP.to(roomChildren.project005.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointSeven = GSAP.to(roomChildren.project006.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointEight = GSAP.to(roomChildren.project007.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointNine = GSAP.to(roomChildren.project008.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointTen = GSAP.to(roomChildren.project009.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointEleven = GSAP.to(roomChildren.project010.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointTwelve = GSAP.to(roomChildren.project011.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointThirteen = GSAP.to(roomChildren.project012.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointFourteen = GSAP.to(roomChildren.project013.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
+
+      const eighthPointFifteen = GSAP.to(roomChildren.project014.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        ease: "back.out(2.2)",
+        duration: 0.5,
+      });
 
       const ninth = GSAP.to(roomChildren.mat.scale, {
         x: 1,
@@ -437,13 +566,13 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.5,
       });
 
-      /* const thirtyNinth = GSAP.to(roomChildren.fish.scale, {
+      const thirtyNinth = GSAP.to(roomChildren.batman.scale, {
         x: 1,
         y: 1,
         z: 1,
         ease: "back.out(2.2)",
         duration: 0.5,
-      }); */
+      });
 
       const fourtieth = GSAP.to(".hero-main-title .animate-this", {
         yPercent: 0,
@@ -486,13 +615,29 @@ function Animations({ ready, roomObject, children }) {
       timeline.add(third, "start");
       timeline.add(fourth, "start");
       timeline.add(fifth, ">+=0.1");
+      timeline.add(fifthPointOne, "<");
       timeline.add(sixth);
       timeline.add(seventh, "-=0.1");
-      /* timeline.add(eighth, "-=0.1"); */
-      timeline.add(ninth, "-=0.1");
-      timeline.add(tenth, "-=0.15");
-      timeline.add(eleventh, "-=0.15");
+      timeline.add(eighth, "-=0.1");
       timeline.add(twelfth, "chairKeyboard");
+      timeline.add(eighthPointOne, "firstbook");
+      timeline.add(eighthPointTwo, "<+=0.1");
+      timeline.add(eighthPointThree, "<+=0.1");
+      timeline.add(eighthPointFour, "<+=0.1");
+      timeline.add(eighthPointFive, "<+=0.1");
+      timeline.add(eighthPointSix, "<+=0.1");
+      timeline.add(eighthPointSeven, "<+=0.1");
+      timeline.add(eighthPointEight, "<+=0.1");
+      timeline.add(eighthPointNine, "<+=0.1");
+      timeline.add(eighthPointTen, "<+=0.1");
+      timeline.add(eighthPointEleven, "<+=0.1");
+      timeline.add(eighthPointTwelve, "<+=0.1");
+      timeline.add(eighthPointThirteen, "<+=0.1");
+      timeline.add(eighthPointFourteen, "<+=0.1");
+      timeline.add(eighthPointFifteen, "<+=0.1");
+      timeline.add(ninth, "firstbook");
+      timeline.add(tenth, ">-=0.15");
+      timeline.add(eleventh, ">-=0.15");
       timeline.add(thirteenth, "chairKeyboard");
       timeline.add(fourteenth, "chairKeyboard");
       timeline.add(fifteenth, "chairKeyboard-=0.2");
@@ -519,7 +664,7 @@ function Animations({ ready, roomObject, children }) {
       timeline.add(thirtySixth, "<+=0.1");
       timeline.add(thirtySeventh, "<+=0.1");
       timeline.add(thirtyEighth, "<+=0.1");
-      /* timeline.add(thirtyNinth, "<+=0.1"); */
+      timeline.add(thirtyNinth, "<+=0.1");
       timeline.add(fourtieth, ">-=0.1");
       timeline.add(fourtyFirst, "<+=0.2");
       timeline.add(fourtySecond, "<+=0.2");
@@ -612,6 +757,7 @@ function Animations({ ready, roomObject, children }) {
           /* actualRoom.scale.set(0, 0, 0); */
           roomChildren.wall.scale.set(1, 1, 1);
           roomChildren.cube.scale.set(1, 1, 1);
+          roomChildren.false_wall.scale.set(1, 1, 1);
           roomChildren.floor.scale.set(1, 1, 1);
           roomChildren.planeFloor.position.y = 0.95;
           //roomChildren.monitorLight.width = 0.724;
@@ -769,6 +915,7 @@ function Animations({ ready, roomObject, children }) {
           roomChildren.floor.scale.set(0.6364, 0.6364, 0.6364); */
           /* actualRoom.scale.set(0.07, 0.07, 0.07); */
           roomChildren.wall.scale.set(1, 1, 1);
+          roomChildren.false_wall.scale.set(1, 1, 1);
           roomChildren.cube.scale.set(1, 1, 1);
           roomChildren.floor.scale.set(1, 1, 1);
           roomChildren.planeFloor.position.y = -0.1;
