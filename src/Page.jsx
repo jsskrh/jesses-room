@@ -238,9 +238,38 @@ function Page({ roomObject }) {
         <div className="fourth-margin section-margin"></div>
 
         <section
-          className="contact-section section left"
+          className="works-section section left"
           ref={setSection}
           key={3}
+        >
+          <div className="progress-wrapper progress-bar-wrapper-left">
+            <div className="progress-bar green-background"></div>
+          </div>
+          <div className="section-content">
+            <div className="section-text">
+              <h3 className="text-head">Lorem Ipsum</h3>
+              <p className="text">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                Dignissimos dolor consectetur in a natus quidem quos eius cum
+                alias vero porro, repellat vel at voluptate numquam dolorem ipsa
+                cumque accusamus.
+              </p>
+              <p className="text">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                Dignissimos dolor consectetur in a natus quidem quos eius cum
+                alias vero porro, repellat vel at voluptate numquam dolorem ipsa
+                cumque accusamus.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div className="fifth-margin section-margin"></div>
+
+        <section
+          className="contact-section section left"
+          ref={setSection}
+          key={4}
         >
           <div className="progress-wrapper progress-bar-wrapper-left">
             <div className="progress-bar blue-background"></div>
@@ -267,12 +296,12 @@ function Page({ roomObject }) {
           </div>
         </section>
 
-        <div className="fifth-margin section-margin"></div>
+        <div className="sixth-margin section-margin"></div>
 
         <section
           className="finally-section section right"
           ref={setSection}
-          key={4}
+          key={5}
         >
           <div className="progress-wrapper progress-bar-wrapper-right">
             <div className="progress-bar cream-background"></div>

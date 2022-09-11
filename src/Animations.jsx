@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import GSAP from "gsap";
+import * as THREE from "three";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useStateValue } from "./StateProvider";
 import { useState } from "react";
@@ -22,18 +23,30 @@ function Animations({ ready, roomObject, children }) {
   const [roomScales, setRoomScales] = useState({});
   const [viewPort, setViewPort] = useState({});
 
+  let INTERSECTED;
+  let INTERSECTED_DATA;
+
+  const projects = [
+    "Project",
+    "Project001",
+    "Project002",
+    "Project005",
+    "Project012",
+    "Project013",
+    null,
+    undefined,
+  ];
+
   const isMobile = useMediaQuery({ query: "(max-width: 968px" });
 
   useEffect(() => {
     if (ready) {
       setRoom(roomObject.scene);
-      console.log(textRefs);
     }
   });
 
   const firstIntro = () => {
     const actualRoom = room;
-    console.log("first intro", roomChildren);
     return new Promise((resolve, reject) => {
       const timeline = new GSAP.timeline();
       timeline.set(".animate-this", { y: 0, yPercent: 100 });
@@ -53,8 +66,6 @@ function Animations({ ready, roomObject, children }) {
           ease: "back.out(2.5)",
           duration: 0.7,
         });
-
-      console.log(roomChildren);
 
       GSAP.registerPlugin(ScrollTrigger);
 
@@ -438,7 +449,7 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.5,
       });
 
-      const twentyThird = GSAP.to(roomChildren.paintings.scale, {
+      const twentyThird = GSAP.to(roomChildren.painting.scale, {
         x: 1,
         y: 1,
         z: 1,
@@ -446,7 +457,7 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.5,
       });
 
-      const twentyFourth = GSAP.to(roomChildren.paintings002.scale, {
+      const twentyFourth = GSAP.to(roomChildren.painting001.scale, {
         x: 1,
         y: 1,
         z: 1,
@@ -454,7 +465,7 @@ function Animations({ ready, roomObject, children }) {
         duration: 0.5,
       });
 
-      const twentyFifth = GSAP.to(roomChildren.paintings004.scale, {
+      const twentyFifth = GSAP.to(roomChildren.painting002.scale, {
         x: 1,
         y: 1,
         z: 1,
@@ -749,6 +760,147 @@ function Animations({ ready, roomObject, children }) {
       const actualRoom = room;
       const orthographicCamera = camera;
 
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+
+      function onMouseDown(event) {
+        event.preventDefault();
+        // calculate pointer position in normalized device coordinates
+        // (-1 to +1) for both components
+
+        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        // console.log(pointer);
+
+        raycaster.setFromCamera(pointer, orthographicCamera);
+
+        // calculate objects intersecting the picking ray
+        const intersects = raycaster.intersectObjects(
+          actualRoom.children,
+          true
+        );
+
+        if (intersects.length > 0) {
+          const showProject = new GSAP.timeline();
+          if (
+            (INTERSECTED == null || INTERSECTED == undefined) &&
+            INTERSECTED != intersects[0].object
+          ) {
+            if (intersects[0].object.parent.name === "Scene") {
+              // if (projects.includes(intersects[0].object.name)) {
+              INTERSECTED = intersects[0].object;
+              // }
+            } else {
+              // if (projects.includes(intersects[0].object.parent.name)) {
+              INTERSECTED = intersects[0].object.parent;
+              // }
+            }
+            if (projects.includes(INTERSECTED.name) === false) {
+              console.log("not project");
+              INTERSECTED = null;
+              return;
+            }
+            // if (projects.includes(INTERSECTED.name)) {
+            console.log(INTERSECTED.name);
+            INTERSECTED_DATA = {
+              position: {
+                x: INTERSECTED.position.x,
+                y: INTERSECTED.position.y,
+                z: INTERSECTED.position.z,
+              },
+              rotation: {
+                x: INTERSECTED.rotation.x,
+                y: INTERSECTED.rotation.y,
+                z: INTERSECTED.rotation.z,
+              },
+            };
+            console.log(INTERSECTED.rotation, "INTERSECTED");
+
+            showProject
+              .to(INTERSECTED.position, {
+                x: INTERSECTED.position.x - 1.5,
+                z: INTERSECTED.position.z + 1.5,
+              })
+              .to(
+                INTERSECTED.rotation,
+                {
+                  x: -0.45,
+                  y: -1.6,
+                },
+                "same"
+              )
+              .to(
+                INTERSECTED.position,
+                {
+                  x: 13.5,
+                  y: 11.5,
+                  z: 10,
+                },
+                "same"
+              )
+              .to(
+                INTERSECTED.scale,
+                {
+                  x: 5,
+                  y: 5,
+                  z: 5,
+                },
+                "same"
+              );
+            // }
+          } else {
+            // if (projects.includes(INTERSECTED.name)) {
+            showProject
+              .to(
+                INTERSECTED.rotation,
+                {
+                  x: INTERSECTED_DATA.rotation.x,
+                  y: INTERSECTED_DATA.rotation.y,
+                },
+                "same"
+              )
+              .to(
+                INTERSECTED.position,
+                {
+                  x: INTERSECTED_DATA.position.x - 1.5,
+                  y: INTERSECTED_DATA.position.y,
+                  z: INTERSECTED_DATA.position.z + 1.5,
+                },
+                "same"
+              )
+              .to(
+                INTERSECTED.scale,
+                {
+                  x: 1,
+                  y: 1,
+                  z: 1,
+                },
+                "same"
+              )
+              .to(INTERSECTED.position, {
+                x: INTERSECTED_DATA.position.x,
+
+                z: INTERSECTED_DATA.position.z,
+              });
+            INTERSECTED = null;
+            // }
+          }
+        } else {
+          // if (INTERSECTED)
+          // INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+        }
+
+        let roomItem;
+      }
+      window.addEventListener("mousedown", onMouseDown);
+    }
+  }, [room]);
+
+  useEffect(() => {
+    if (ready) {
+      const actualRoom = room;
+      const orthographicCamera = camera;
+
       GSAP.registerPlugin(ScrollTrigger);
 
       ScrollTrigger.matchMedia({
@@ -835,9 +987,11 @@ function Animations({ ready, roomObject, children }) {
               invalidateOnRefresh: true,
             },
           }).to(orthographicCamera.position, {
-            x: 2,
-            y: 9.2,
+            x: 4,
+            y: 3.5,
           });
+
+          console.log(roomChildren.book_shelf.position, "shelf");
 
           // Fourth Section
           const fourthMoveTimeline = new GSAP.timeline({
@@ -850,14 +1004,29 @@ function Animations({ ready, roomObject, children }) {
               invalidateOnRefresh: true,
             },
           }).to(orthographicCamera.position, {
-            x: -3.5,
-            y: -2.3,
+            x: 2,
+            y: 9.2,
           });
 
           // Fifth Section
           const fifthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fifth-margin",
+              markers: true,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          }).to(orthographicCamera.position, {
+            x: -3.5,
+            y: -2.3,
+          });
+
+          // Sixth Section
+          const sixthMoveTimeline = new GSAP.timeline({
+            scrollTrigger: {
+              trigger: ".sixth-margin",
               markers: true,
               start: "top top",
               end: "bottom bottom",
@@ -989,21 +1158,6 @@ function Animations({ ready, roomObject, children }) {
           //  "same"
           //);
 
-          // Third Section
-          const thirdMoveTimeline = new GSAP.timeline({
-            scrollTrigger: {
-              trigger: ".third-margin",
-              markers: true,
-              start: "top top",
-              end: "bottom bottom",
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          }).to(orthographicCamera.position, {
-            x: 3.56,
-            y: 6.5,
-          });
-
           // Fourth Section
           const fourthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
@@ -1015,14 +1169,29 @@ function Animations({ ready, roomObject, children }) {
               invalidateOnRefresh: true,
             },
           }).to(orthographicCamera.position, {
-            x: -0.02,
-            y: -0.55,
+            x: 3.56,
+            y: 6.5,
           });
 
           // Fifth Section
           const fifthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fifth-margin",
+              markers: true,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          }).to(orthographicCamera.position, {
+            x: -0.02,
+            y: -0.55,
+          });
+
+          // Sixth Section
+          const sixthMoveTimeline = new GSAP.timeline({
+            scrollTrigger: {
+              trigger: ".sixth-margin",
               markers: true,
               start: "top top",
               end: "bottom bottom",

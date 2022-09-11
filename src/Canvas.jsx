@@ -454,6 +454,47 @@ function Canvas({ ready, items, roomObject }) {
       scene.add(circleSecond);
       scene.add(circleThird);
 
+      /* const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+
+      function onMouseDown(event) {
+        // calculate pointer position in normalized device coordinates
+        // (-1 to +1) for both components
+
+        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        console.log(pointer);
+
+        raycaster.setFromCamera(pointer, orthographicCamera);
+
+        // calculate objects intersecting the picking ray
+        const intersects = raycaster.intersectObjects(actualRoom.children);
+
+        console.log(intersects[0].object);
+        if (intersects[0].object.parent.name === "Scene") {
+          const roomObject = intersects[0].object;
+          GSAP.to(roomObject.scale, {
+            x: 0,
+            y: 0,
+            z: 0,
+          });
+        } else {
+          const roomObject = intersects[0].object.parent;
+          GSAP.to(roomObject.scale, {
+            x: 0,
+            y: 0,
+            z: 0,
+          });
+        }
+      } */
+      /* function onPointerMove(event) {
+        // calculate pointer position in normalized device coordinates
+        // (-1 to +1) for both components
+
+        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      } */
+
       // ANIMATE
       var animate = function () {
         requestAnimationFrame(animate);
@@ -469,6 +510,9 @@ function Canvas({ ready, items, roomObject }) {
         mixer.update(delta * 0.009); */
         renderer.render(scene, orthographicCamera);
       };
+
+      /* window.addEventListener("mousedown", onMouseDown); */
+      /* window.addEventListener("pointermove", onPointerMove); */
 
       create_room_children(roomChildren);
 
