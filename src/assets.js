@@ -7,6 +7,6 @@ export default [
   {
     name: "screen",
     type: "videoTexture",
-    path: "/textures/sao.mp4",
+    path: "https://res.cloudinary.com/jsskrh/video/upload/v1758531551/personal/sao_vwn4xr.mp4",
   },
 ];
