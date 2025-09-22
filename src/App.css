@@ -18,6 +18,11 @@ body {
   background-color: var(--color-bg);
 }
 
+a {
+  text-decoration: none;
+  color: unset;
+}
+
 h1,
 h3,
 section,

@@ -22,6 +22,8 @@ function Animations({ ready, roomObject, children }) {
   const [room, setRoom] = useState({});
   const [roomScales, setRoomScales] = useState({});
   const [viewPort, setViewPort] = useState({});
+  const [currentActiveBook, setCurrentActiveBook] = useState(null);
+  const [originalBookStates, setOriginalBookStates] = useState({});
 
   let INTERSECTED;
   let INTERSECTED_DATA;
@@ -37,13 +39,264 @@ function Animations({ ready, roomObject, children }) {
     undefined,
   ];
 
+  const projectToBookMapping = {
+    "Liberty Link": "project",
+    Proxze: "project001",
+    Splitmulti: "project002",
+    Wasshh: "project005",
+    "Silky Touch": "project012",
+    "Regel Technology": "project013",
+  };
+
+  const projectLinks = {
+    project: "https://www.libertylinkplus.com",
+    project001: "https://www.proxze.com",
+    project002: "https://www.splitmulti.com",
+    project005: "https://www.wasshh.com",
+    project012: "https://www.silkytouchemporium.com",
+    project013: "https://www.regeltechnology.com",
+  };
+
   const isMobile = useMediaQuery({ query: "(max-width: 968px" });
+
+  // useEffect(() => {
+  //   if (ready) {
+  //     setRoom(roomObject.scene);
+  //   }
+  // });
 
   useEffect(() => {
     if (ready) {
       setRoom(roomObject.scene);
+
+      // Store original positions and rotations of all books
+      const bookStates = {};
+      Object.values(projectToBookMapping).forEach((bookName) => {
+        if (roomChildren[bookName]) {
+          bookStates[bookName] = {
+            position: {
+              x: roomChildren[bookName].position.x,
+              y: roomChildren[bookName].position.y,
+              z: roomChildren[bookName].position.z,
+            },
+            rotation: {
+              x: roomChildren[bookName].rotation.x,
+              y: roomChildren[bookName].rotation.y,
+              z: roomChildren[bookName].rotation.z,
+            },
+          };
+        }
+      });
+      setOriginalBookStates(bookStates);
     }
-  });
+  }, [ready, roomChildren]);
+
+  // Function to animate book pop-out
+  const animateBookPopOut = (bookObject, originalState) => {
+    const timeline = new GSAP.timeline();
+
+    return timeline
+      .to(bookObject.position, {
+        x: originalState.position.x - 1.5,
+        z: originalState.position.z + 1.5,
+      })
+      .to(
+        bookObject.rotation,
+        {
+          x: -0.525,
+          y: -1.58,
+        },
+        "same"
+      )
+      .to(
+        bookObject.position,
+        {
+          x: 13.5,
+          y: 11.5,
+          z: 10,
+        },
+        "same"
+      )
+      .to(
+        bookObject.scale,
+        {
+          x: 5,
+          y: 5,
+          z: 5,
+        },
+        "same"
+      );
+  };
+
+  // Function to animate book return
+  const animateBookReturn = (bookObject, originalState) => {
+    const timeline = new GSAP.timeline();
+
+    return timeline
+      .to(bookObject.rotation, {
+        x: originalState.rotation.x,
+        y: originalState.rotation.y,
+        duration: 0.3,
+      })
+      .to(
+        bookObject.position,
+        {
+          x: originalState.position.x - 1.5,
+          y: originalState.position.y,
+          z: originalState.position.z + 1.5,
+          duration: 0.3,
+        },
+        "<"
+      )
+      .to(
+        bookObject.scale,
+        {
+          x: 1,
+          y: 1,
+          z: 1,
+          duration: 0.3,
+        },
+        "<"
+      )
+      .to(bookObject.position, {
+        x: originalState.position.x,
+        z: originalState.position.z,
+        duration: 0.2,
+      });
+  };
+
+  // Set up scroll triggers for project headings
+  useEffect(() => {
+    if (ready && room && Object.keys(originalBookStates).length > 0) {
+      GSAP.registerPlugin(ScrollTrigger);
+
+      // Use a ref to track current active book to avoid dependency issues
+      let activeBookRef = { current: currentActiveBook };
+      let isAnimating = false; // Prevent multiple simultaneous animations
+
+      // Debounced function to handle book changes
+      const handleBookChange = (newBookName, delay = 0) => {
+        if (isAnimating) return; // Prevent overlapping animations
+
+        setTimeout(() => {
+          if (isAnimating) return; // Double check after delay
+
+          isAnimating = true;
+
+          // Return current active book if different
+          if (activeBookRef.current && activeBookRef.current !== newBookName) {
+            const currentBookObj = roomChildren[activeBookRef.current];
+            const currentOriginalState =
+              originalBookStates[activeBookRef.current];
+            if (currentBookObj && currentOriginalState) {
+              animateBookReturn(currentBookObj, currentOriginalState);
+            }
+          }
+
+          // Animate new book if specified
+          if (newBookName) {
+            const bookObject = roomChildren[newBookName];
+            const originalState = originalBookStates[newBookName];
+            if (bookObject && originalState) {
+              animateBookPopOut(bookObject, originalState);
+            }
+          }
+
+          activeBookRef.current = newBookName;
+          setCurrentActiveBook(newBookName);
+
+          // Reset animation lock after a delay
+          setTimeout(() => {
+            isAnimating = false;
+          }, 300); // Adjust based on your animation duration
+        }, delay);
+      };
+
+      // Get all project headings
+      const projectHeadings = document.querySelectorAll(".text-head.project");
+
+      projectHeadings.forEach((heading, index) => {
+        const projectName = heading.textContent.trim();
+        const bookName = projectToBookMapping[projectName];
+        const isLastHeading = index === projectHeadings.length - 1;
+        const isFirstHeading = index === 0;
+
+        if (
+          bookName &&
+          roomChildren[bookName] &&
+          originalBookStates[bookName]
+        ) {
+          ScrollTrigger.create({
+            trigger: heading,
+            start: "center center",
+            end: "center center",
+            onEnter: () => handleBookChange(bookName),
+            onEnterBack: () => handleBookChange(bookName),
+          });
+
+          // Special trigger for the last heading - return book when it reaches top of screen
+          if (isLastHeading) {
+            ScrollTrigger.create({
+              trigger: heading,
+              start: "top top",
+              onEnter: () => {
+                if (activeBookRef.current === bookName) {
+                  handleBookChange(null);
+                }
+              },
+            });
+          }
+
+          // Special trigger for the first heading - return book when scrolling up and it reaches bottom of screen
+          if (isFirstHeading) {
+            ScrollTrigger.create({
+              trigger: heading,
+              start: "bottom bottom",
+              onLeaveBack: () => {
+                if (activeBookRef.current === bookName) {
+                  handleBookChange(null);
+                }
+              },
+            });
+          }
+        }
+      });
+
+      // Create a trigger to return the last book when scrolling past all projects
+      const worksSection = document.querySelector(".works-section");
+      if (worksSection) {
+        ScrollTrigger.create({
+          trigger: worksSection,
+          start: "bottom center",
+          onEnter: () => {
+            if (activeBookRef.current) {
+              const bookObject = roomChildren[activeBookRef.current];
+              const originalState = originalBookStates[activeBookRef.current];
+              if (bookObject && originalState) {
+                animateBookReturn(bookObject, originalState);
+                activeBookRef.current = null;
+                setCurrentActiveBook(null);
+              }
+            }
+          },
+        });
+      }
+
+      // Cleanup function to kill ScrollTriggers
+      return () => {
+        ScrollTrigger.getAll().forEach((trigger) => {
+          if (
+            trigger.vars &&
+            trigger.vars.trigger &&
+            (trigger.vars.trigger.classList?.contains("text-head") ||
+              trigger.vars.trigger.classList?.contains("works-section"))
+          ) {
+            trigger.kill();
+          }
+        });
+      };
+    }
+  }, [ready, room, roomChildren, originalBookStates]);
 
   const firstIntro = () => {
     const actualRoom = room;
@@ -770,7 +1023,7 @@ function Animations({ ready, roomObject, children }) {
 
         pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
         pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        // console.log(pointer);
+        console.log(pointer);
 
         raycaster.setFromCamera(pointer, orthographicCamera);
 
@@ -781,110 +1034,166 @@ function Animations({ ready, roomObject, children }) {
         );
 
         if (intersects.length > 0) {
-          const showProject = new GSAP.timeline();
-          if (
-            (INTERSECTED == null || INTERSECTED == undefined) &&
-            INTERSECTED != intersects[0].object
-          ) {
-            if (intersects[0].object.parent.name === "Scene") {
-              // if (projects.includes(intersects[0].object.name)) {
-              INTERSECTED = intersects[0].object;
-              // }
-            } else {
-              // if (projects.includes(intersects[0].object.parent.name)) {
-              INTERSECTED = intersects[0].object.parent;
-              // }
-            }
-            if (projects.includes(INTERSECTED.name) === false) {
-              console.log("not project");
-              INTERSECTED = null;
-              return;
-            }
-            // if (projects.includes(INTERSECTED.name)) {
-            console.log(INTERSECTED.name);
-            INTERSECTED_DATA = {
-              position: {
-                x: INTERSECTED.position.x,
-                y: INTERSECTED.position.y,
-                z: INTERSECTED.position.z,
-              },
-              rotation: {
-                x: INTERSECTED.rotation.x,
-                y: INTERSECTED.rotation.y,
-                z: INTERSECTED.rotation.z,
-              },
-            };
-            console.log(INTERSECTED.rotation, "INTERSECTED");
+          let targetObject;
 
-            showProject
-              .to(INTERSECTED.position, {
-                x: INTERSECTED.position.x - 1.5,
-                z: INTERSECTED.position.z + 1.5,
-              })
-              .to(
-                INTERSECTED.rotation,
-                {
-                  x: -0.45,
-                  y: -1.6,
-                },
-                "same"
-              )
-              .to(
-                INTERSECTED.position,
-                {
-                  x: 13.5,
-                  y: 11.5,
-                  z: 10,
-                },
-                "same"
-              )
-              .to(
-                INTERSECTED.scale,
-                {
-                  x: 5,
-                  y: 5,
-                  z: 5,
-                },
-                "same"
-              );
-            // }
+          // Determine the target object
+          if (intersects[0].object.parent.name === "Scene") {
+            targetObject = intersects[0].object;
           } else {
-            // if (projects.includes(INTERSECTED.name)) {
-            showProject
-              .to(
-                INTERSECTED.rotation,
-                {
-                  x: INTERSECTED_DATA.rotation.x,
-                  y: INTERSECTED_DATA.rotation.y,
-                },
-                "same"
-              )
-              .to(
-                INTERSECTED.position,
-                {
-                  x: INTERSECTED_DATA.position.x - 1.5,
-                  y: INTERSECTED_DATA.position.y,
-                  z: INTERSECTED_DATA.position.z + 1.5,
-                },
-                "same"
-              )
-              .to(
-                INTERSECTED.scale,
-                {
-                  x: 1,
-                  y: 1,
-                  z: 1,
-                },
-                "same"
-              )
-              .to(INTERSECTED.position, {
-                x: INTERSECTED_DATA.position.x,
-
-                z: INTERSECTED_DATA.position.z,
-              });
-            INTERSECTED = null;
-            // }
+            targetObject = intersects[0].object.parent;
           }
+
+          console.log(targetObject.name);
+          // Check if the clicked object is a valid project
+          if (
+            !projects.includes(targetObject.name) &&
+            targetObject.name !== "Book_Shelf"
+          ) {
+            console.log("not project");
+            return;
+          }
+
+          if (
+            currentActiveBook
+            // &&
+            // roomChildren[currentActiveBook] === targetObject
+          ) {
+            console.log(
+              currentActiveBook,
+              projectLinks,
+              projectLinks[currentActiveBook]
+            );
+
+            // Project is active, open its link
+            const projectLink = projectLinks[currentActiveBook];
+            if (projectLink) {
+              window.open(projectLink, "_blank");
+            } else {
+              console.log("No link found for project:", targetObject.name);
+            }
+            return;
+          }
+
+          // const showProject = new GSAP.timeline();
+          // if (
+          //   (INTERSECTED == null || INTERSECTED == undefined) &&
+          //   INTERSECTED != intersects[0].object
+          // ) {
+          //   if (intersects[0].object.parent.name === "Scene") {
+          //     // if (projects.includes(intersects[0].object.name)) {
+          //     INTERSECTED = intersects[0].object;
+          //     // }
+          //   } else {
+          //     // if (projects.includes(intersects[0].object.parent.name)) {
+          //     INTERSECTED = intersects[0].object.parent;
+          //     // }
+          //   }
+          //   if (projects.includes(INTERSECTED.name) === false) {
+          //     console.log("not project");
+          //     INTERSECTED = null;
+          //     return;
+          //   }
+
+          //   if (
+          //     currentActiveBook &&
+          //     roomChildren[currentActiveBook] === targetObject
+          //   ) {
+          //     // Project is active, open its link
+          //     const projectLink = projectLinks[targetObject.name];
+          //     if (projectLink) {
+          //       console.log("Opening project link:", projectLink);
+          //       window.open(projectLink, "_blank");
+          //     } else {
+          //       console.log("No link found for project:", targetObject.name);
+          //     }
+          //     return;
+          //   }
+
+          //   // if (projects.includes(INTERSECTED.name)) {
+          //   console.log(INTERSECTED.name);
+          //   INTERSECTED_DATA = {
+          //     position: {
+          //       x: INTERSECTED.position.x,
+          //       y: INTERSECTED.position.y,
+          //       z: INTERSECTED.position.z,
+          //     },
+          //     rotation: {
+          //       x: INTERSECTED.rotation.x,
+          //       y: INTERSECTED.rotation.y,
+          //       z: INTERSECTED.rotation.z,
+          //     },
+          //   };
+          //   console.log(INTERSECTED.rotation, "INTERSECTED");
+
+          //   // showProject
+          //   //   .to(INTERSECTED.position, {
+          //   //     x: INTERSECTED.position.x - 1.5,
+          //   //     z: INTERSECTED.position.z + 1.5,
+          //   //   })
+          //   //   .to(
+          //   //     INTERSECTED.rotation,
+          //   //     {
+          //   //       x: -0.525,
+          //   //       y: -1.58,
+          //   //     },
+          //   //     "same"
+          //   //   )
+          //   //   .to(
+          //   //     INTERSECTED.position,
+          //   //     {
+          //   //       x: 13.5,
+          //   //       y: 11.5,
+          //   //       z: 10,
+          //   //     },
+          //   //     "same"
+          //   //   )
+          //   //   .to(
+          //   //     INTERSECTED.scale,
+          //   //     {
+          //   //       x: 5,
+          //   //       y: 5,
+          //   //       z: 5,
+          //   //     },
+          //   //     "same"
+          //   //   );
+          //   // }
+          // } else {
+          //   // if (projects.includes(INTERSECTED.name)) {
+          //   // showProject
+          //   //   .to(
+          //   //     INTERSECTED.rotation,
+          //   //     {
+          //   //       x: INTERSECTED_DATA.rotation.x,
+          //   //       y: INTERSECTED_DATA.rotation.y,
+          //   //     },
+          //   //     "same"
+          //   //   )
+          //   //   .to(
+          //   //     INTERSECTED.position,
+          //   //     {
+          //   //       x: INTERSECTED_DATA.position.x - 1.5,
+          //   //       y: INTERSECTED_DATA.position.y,
+          //   //       z: INTERSECTED_DATA.position.z + 1.5,
+          //   //     },
+          //   //     "same"
+          //   //   )
+          //   //   .to(
+          //   //     INTERSECTED.scale,
+          //   //     {
+          //   //       x: 1,
+          //   //       y: 1,
+          //   //       z: 1,
+          //   //     },
+          //   //     "same"
+          //   //   )
+          //   //   .to(INTERSECTED.position, {
+          //   //     x: INTERSECTED_DATA.position.x,
+
+          //   //     z: INTERSECTED_DATA.position.z,
+          //   //   });
+          //   INTERSECTED = null;
+          //   // }
+          // }
         } else {
           // if (INTERSECTED)
           // INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
@@ -894,7 +1203,7 @@ function Animations({ ready, roomObject, children }) {
       }
       window.addEventListener("mousedown", onMouseDown);
     }
-  }, [room]);
+  }, [room, currentActiveBook]);
 
   useEffect(() => {
     if (ready) {
@@ -923,7 +1232,7 @@ function Animations({ ready, roomObject, children }) {
           const firstMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".first-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -939,7 +1248,7 @@ function Animations({ ready, roomObject, children }) {
           const secondMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".second-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -980,7 +1289,7 @@ function Animations({ ready, roomObject, children }) {
           const thirdMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".third-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -997,7 +1306,7 @@ function Animations({ ready, roomObject, children }) {
           const fourthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fourth-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1012,7 +1321,7 @@ function Animations({ ready, roomObject, children }) {
           const fifthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fifth-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1027,7 +1336,7 @@ function Animations({ ready, roomObject, children }) {
           const sixthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".sixth-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1100,7 +1409,7 @@ function Animations({ ready, roomObject, children }) {
           const firstMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".first-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1123,7 +1432,7 @@ function Animations({ ready, roomObject, children }) {
           const secondMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".second-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1162,7 +1471,7 @@ function Animations({ ready, roomObject, children }) {
           const fourthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fourth-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1177,7 +1486,7 @@ function Animations({ ready, roomObject, children }) {
           const fifthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fifth-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1192,7 +1501,7 @@ function Animations({ ready, roomObject, children }) {
           const sixthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".sixth-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1247,7 +1556,7 @@ function Animations({ ready, roomObject, children }) {
           const secondPartTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fourth-margin",
-              markers: true,
+              // markers: true,
               start: "center center",
             },
           });
@@ -1347,7 +1656,7 @@ function Animations({ ready, roomObject, children }) {
           const firstMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".first-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1363,7 +1672,7 @@ function Animations({ ready, roomObject, children }) {
           const secondMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".second-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1398,7 +1707,7 @@ function Animations({ ready, roomObject, children }) {
           const fourthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fourth-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1414,7 +1723,7 @@ function Animations({ ready, roomObject, children }) {
           const fifthMoveTimeline = new GSAP.timeline({
             scrollTrigger: {
               trigger: ".fifth-margin",
-              markers: true,
+              // markers: true,
               start: "top top",
               end: "bottom bottom",
               scrub: 0.6,
@@ -1437,7 +1746,7 @@ function Animations({ ready, roomObject, children }) {
                   start: "top bottom",
                   end: "top top",
                   scrub: 0.6,
-                  markers: true,
+                  // markers: true,
                 },
               });
               GSAP.to(section, {
@@ -1447,7 +1756,7 @@ function Animations({ ready, roomObject, children }) {
                   start: "bottom bottom",
                   end: "bottom top",
                   scrub: 0.6,
-                  markers: true,
+                  // markers: true,
                 },
               });
             } else {
@@ -1458,7 +1767,7 @@ function Animations({ ready, roomObject, children }) {
                   start: "top bottom",
                   end: "top top",
                   scrub: 0.6,
-                  markers: true,
+                  // markers: true,
                 },
               });
               GSAP.to(section, {
@@ -1468,7 +1777,7 @@ function Animations({ ready, roomObject, children }) {
                   start: "bottom bottom",
                   end: "bottom top",
                   scrub: 0.6,
-                  markers: true,
+                  // markers: true,
                 },
               });
             }

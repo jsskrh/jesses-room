@@ -49,7 +49,7 @@ function App() {
           height: window.innerHeight,
         };
       },
-      fixedMarkers: true,
+      // fixedMarkers: true,
     });
 
     asscroll.on("update", ScrollTrigger.update);

@@ -319,7 +319,7 @@ function Canvas({ ready, items, roomObject }) {
       lampLight.rotation.x = -Math.PI / 2;
       lampLight.rotation.z = Math.PI / 4;
       roomChildren["lampLight"] = lampLight;
-      //actualRoom.add(lampLight);
+      // actualRoom.add(lampLight);
 
       // DARK THEME
       window.addEventListener("click", () => {
@@ -345,10 +345,10 @@ function Canvas({ ready, items, roomObject }) {
           }); */
           /* GSAP.to(tankLight, {
             intensity: 1,
-          });
-          GSAP.to(lampLight, {
-            intensity: 1,
-          }); */
+          });*/
+          // GSAP.to(lampLight, {
+          //   intensity: 1,
+          // });
         } else {
           GSAP.to(sunLight.color, {
             r: 1,
@@ -371,10 +371,10 @@ function Canvas({ ready, items, roomObject }) {
           }); */
           /* GSAP.to(tankLight, {
             intensity: 0,
-          });
-          GSAP.to(lampLight, {
-            intensity: 0,
-          }); */
+          });*/
+          // GSAP.to(lampLight, {
+          //   intensity: 0,
+          // });
         }
       });
       /* console.log(actualRoom.position); */
