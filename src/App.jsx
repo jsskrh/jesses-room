@@ -80,9 +80,8 @@ function App() {
     const setLoaders = () => {
       loaders.gltfLoader = new GLTFLoader();
       loaders.dracoLoader = new DRACOLoader();
-      loaders.dracoLoader.setDecoderPath(
-        "/node_modules/three/examples/js/libs/draco/"
-      );
+      // loaders.dracoLoader.setDecoderPath("/node_modules/draco3d/");
+      loaders.dracoLoader.setDecoderPath("/draco/");
       loaders.gltfLoader.setDRACOLoader(loaders.dracoLoader);
     };
 
