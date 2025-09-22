@@ -97,6 +97,7 @@ function App() {
 
           video[asset.name] = document.createElement("video");
           video[asset.name].src = asset.path;
+          video[asset.name].crossOrigin = "anonymous";
           video[asset.name].muted = true;
           video[asset.name].playsInline = true;
           video[asset.name].autoplay = true;
