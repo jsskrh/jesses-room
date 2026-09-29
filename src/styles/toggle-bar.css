@@ -29,11 +29,6 @@
   border-radius: 999px;
   border: none;
   background-color: var(--color-primary);
-  box-shadow: 0 0 6px rgba(var(--color-black), 0.2);
-}
-
-.toggle-bar {
-  opacity: 0;
 }
 
 .toggle-button:hover .toggle-circle {
@@ -50,7 +45,7 @@
   transition: all 0.2s ease-in-out;
 }
 
-.slide {
+.dark-theme .toggle-circle {
   left: 30px;
 }
 
@@ -72,7 +67,7 @@
     height: 16px;
   }
 
-  .slide {
+  .dark-theme .toggle-circle {
     left: 29px;
   }
 

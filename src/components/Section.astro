@@ -1,0 +1,35 @@
+---
+interface Props {
+  variant: "about-section" | "works-section" | "contact-section" | "finally-section";
+  side: "left" | "right";
+  bar: "pink" | "green" | "blue" | "cream";
+  title?: string;
+  number?: string;
+}
+
+const { variant, side, bar, title, number } = Astro.props;
+---
+
+<section class:list={[variant, "section", side]}>
+  <div class:list={["progress-wrapper", `progress-bar-wrapper-${side}`]}>
+    <div class:list={["progress-bar", `${bar}-background`]}></div>
+  </div>
+  {
+    title && (
+      <div class="section-header">
+        <div class="header-top">
+          <h2 class="section-title-text">{title}</h2>
+          <div class="section-title-decoration bar-one" />
+          <div class="section-title-decoration bar-two" />
+          <div class="section-title-decoration bar-three" />
+        </div>
+        <span class="section-number">{number}</span>
+      </div>
+    )
+  }
+  <div class="section-content">
+    <div class="section-text">
+      <slot />
+    </div>
+  </div>
+</section>

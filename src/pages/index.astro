@@ -1,0 +1,76 @@
+---
+import { getCollection, getEntry, render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import Section from "../components/Section.astro";
+import ToggleBar from "../components/ToggleBar.astro";
+import "../styles/page.css";
+
+async function homeSection(id: string) {
+  const entry = await getEntry("home", id);
+  if (!entry) throw new Error(`Missing src/content/home/${id}.md`);
+  return (await render(entry)).Content;
+}
+
+const About = await homeSection("about");
+const Works = await homeSection("works");
+const Technologies = await homeSection("technologies");
+const Contact = await homeSection("contact");
+const Finally = await homeSection("finally");
+
+const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base>
+  <div class="page">
+    <ToggleBar />
+    <main class="page-wrapper">
+      <Hero />
+
+      <div class="first-margin section-margin"></div>
+
+      <Section variant="about-section" side="left" bar="pink" title="About me" number="01">
+        <About />
+      </Section>
+
+      <div class="second-margin section-margin"></div>
+
+      <Section variant="works-section" side="right" bar="green" title="My Works" number="02">
+        <Works />
+      </Section>
+
+      <div class="third-margin section-margin"></div>
+
+      <Section variant="works-section" side="left" bar="green">
+        {
+          projects.map((project) => (
+            <>
+              <h3 data-book={project.data.bookNode}>{project.data.title}</h3>
+              {project.data.summary.map((paragraph) => (
+                <p>{paragraph}</p>
+              ))}
+            </>
+          ))
+        }
+      </Section>
+
+      <div class="fourth-margin section-margin"></div>
+
+      <Section variant="works-section" side="left" bar="green">
+        <Technologies />
+      </Section>
+
+      <div class="fifth-margin section-margin"></div>
+
+      <Section variant="contact-section" side="left" bar="blue" title="Contact" number="03">
+        <Contact />
+      </Section>
+
+      <div class="sixth-margin section-margin"></div>
+
+      <Section variant="finally-section" side="right" bar="cream" title="Finally" number="04">
+        <Finally />
+      </Section>
+    </main>
+  </div>
+</Base>

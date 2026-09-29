@@ -1,0 +1,42 @@
+---
+import "@fontsource/montserrat/latin-300.css";
+import "@fontsource/montserrat/latin-400.css";
+import "@fontsource/montserrat/latin-500.css";
+import "@fontsource/montserrat/latin-700.css";
+import "../styles/global.css";
+import { site } from "../site";
+
+interface Props {
+  title?: string;
+}
+
+const { title = site.title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="light-theme">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>{title}</title>
+    <script is:inline>
+      // Apply the saved theme, or the OS preference, before first paint.
+      (function () {
+        var saved = null;
+        try {
+          saved = localStorage.getItem("theme");
+        } catch (e) {}
+        var dark = saved
+          ? saved === "dark"
+          : matchMedia("(prefers-color-scheme: dark)").matches;
+        var root = document.documentElement;
+        root.classList.toggle("dark-theme", dark);
+        root.classList.toggle("light-theme", !dark);
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

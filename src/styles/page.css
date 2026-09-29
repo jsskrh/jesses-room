@@ -1,13 +1,16 @@
-.page {
-  z-index: 99999;
-  height: 100%;
+/* HERO */
+
+.hero {
   width: 100%;
-  /* overflow: hidden; */
+  height: 100vh;
 }
 
-.animate-this {
-  display: inline-block;
-  transform: translateY(100%);
+.hero-wrapper {
+  position: relative;
+  height: 100%;
+  width: calc(100% - 260px);
+  margin: 0 auto;
+  max-width: 1100px;
 }
 
 .intro-text {
@@ -21,7 +24,6 @@
 }
 
 .arrow-svg-wrapper {
-  opacity: 0;
   position: absolute;
   top: 90%;
   left: 50%;
@@ -43,21 +45,11 @@
   transform: scale(0.7);
 }
 
-.page-wrapper {
-  position: relative;
-}
-
-.hero {
-  width: 100vw;
-  height: 100vh;
-}
-
-.hero-wrapper {
-  position: relative;
-  height: 100%;
-  width: calc(100% - 260px);
-  margin: 0 auto;
-  max-width: 1100px;
+/* The welcome line and arrow belong to the room's intro sequence. Without the
+   room (no WebGL, or before phase 2), the hero shows its post-intro state. */
+html:not(.has-room) .intro-text,
+html:not(.has-room) .arrow-svg-wrapper {
+  display: none;
 }
 
 .hero-main {
@@ -84,6 +76,12 @@
   text-transform: uppercase;
 }
 
+/* SECTIONS */
+
+.page-wrapper {
+  position: relative;
+}
+
 .section-margin {
   width: 100%;
   height: 3000px;
@@ -98,83 +96,25 @@
   overflow: hidden;
 }
 
-/* optimize later on, make them components */
-
-.about-section .section-header,
-.about-section .section-title-decoration {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+.about-section {
+  --accent: var(--color-primary);
 }
 
-.about-section .section-title-decoration.bar-three {
-  background-color: var(--color-primary);
+.works-section {
+  --accent: var(--color-green);
 }
 
-.about-section .text-link:hover {
-  color: var(--color-primary);
-}
-
-.about-section .text-link:after {
-  background-color: var(--color-primary);
-}
-
-.works-section .section-header,
-.works-section .section-title-decoration {
-  color: var(--color-green);
-  border-color: var(--color-green);
-}
-
-.works-section .section-title-decoration.bar-three {
-  background-color: var(--color-green);
-}
-
-.works-section .text-link:hover {
-  color: var(--color-green);
-}
-
-.works-section .text-link:after {
-  background-color: var(--color-green);
-}
-
-.contact-section .section-header,
-.contact-section .section-title-decoration {
-  color: var(--color-blue);
-  border-color: var(--color-blue);
-}
-
-.contact-section .section-title-decoration.bar-three {
-  background-color: var(--color-blue);
-}
-
-.contact-section .text-link:hover {
-  color: var(--color-blue);
-}
-
-.contact-section .text-link:after {
-  background-color: var(--color-blue);
+.contact-section {
+  --accent: var(--color-blue);
 }
 
 .finally-section {
+  --accent: var(--color-cream);
   background-color: var(--final-section);
 }
 
-.finally-section .section-header,
-.finally-section .section-title-decoration,
-.finally-section .text {
+.finally-section .section-text p {
   color: var(--color-cream);
-  border-color: var(--color-cream);
-}
-
-.finally-section .section-title-decoration.bar-three {
-  background-color: var(--color-cream);
-}
-
-.finally-section .text-link:hover {
-  color: var(--color-cream);
-}
-
-.finally-section .text-link:after {
-  background-color: var(--color-cream);
 }
 
 .left {
@@ -190,6 +130,7 @@
 }
 
 /* Progress bar */
+
 .progress-wrapper {
   height: 0;
   width: 12px;
@@ -212,7 +153,6 @@
   height: 100vh;
   width: 100%;
   transform-origin: top center;
-  /* transform: scaleY(1); */
 }
 
 .pink-background {
@@ -231,13 +171,18 @@
   background-color: var(--color-cream);
 }
 
+/* Section header */
+
 .section-header {
   position: relative;
   width: 100%;
   height: 84vh;
   padding: 30% 10% 0;
   border-bottom: 2px solid;
-  transition: color 0.3s cubic-bezier(0.33, 0.25, 0.07, 0.97),
+  color: var(--accent);
+  border-color: var(--accent);
+  transition:
+    color 0.3s cubic-bezier(0.33, 0.25, 0.07, 0.97),
     background-color 0.3s cubic-bezier(0.33, 0.25, 0.07, 0.97);
   text-transform: uppercase;
 }
@@ -269,6 +214,8 @@
   height: 60px;
   left: 0;
   border: 1px solid;
+  color: var(--accent);
+  border-color: var(--accent);
   transform-origin: left;
   transform: skewY(-25deg) translateZ(0);
 }
@@ -283,6 +230,7 @@
 
 .section-title-decoration.bar-three {
   top: 80px;
+  background-color: var(--accent);
   transform: skewY(25deg) translateZ(0);
 }
 
@@ -296,27 +244,39 @@
   line-height: 1;
 }
 
+/* Section content. Headings, paragraphs and links come from Markdown, so they
+   are styled by element rather than by class. */
+
 .section-content {
   width: 100%;
   padding: 160px 8% 24px;
 }
 
-.section-content .text-head:first-child {
-  margin-top: 0;
-}
-
-.section-content .text-head {
+.section-text h3 {
   font-size: 20px;
   line-height: 1.8;
   font-weight: 700;
   margin-top: 80px;
 }
 
-.section-content .text-link {
+.section-text h3:first-child {
+  margin-top: 0;
+}
+
+.section-text p {
+  line-height: 2;
+  margin-top: 18px;
+}
+
+.section-text a {
   position: relative;
 }
 
-.section-content .text-link:after {
+.section-text a:hover {
+  color: var(--accent);
+}
+
+.section-text a::after {
   position: absolute;
   content: "";
   width: 100%;
@@ -324,11 +284,7 @@
   height: 2px;
   left: 0;
   right: 0;
-}
-
-.section-content .text {
-  line-height: 2;
-  margin-top: 18px;
+  background-color: var(--accent);
 }
 
 @media (min-width: 969px) {
@@ -341,11 +297,6 @@
   .section {
     width: 100%;
   }
-
-  /* .progress-bar-wrapper-left {
-    right: 0;
-    left: auto;
-  } */
 
   .hero-main {
     bottom: 120px;
