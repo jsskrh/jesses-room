@@ -21,8 +21,10 @@ const { title = site.title } = Astro.props;
     <link rel="icon" href="/favicon.ico" />
     <title>{title}</title>
     <script is:inline>
-      // Apply the saved theme, or the OS preference, before first paint.
       (function () {
+        var root = document.documentElement;
+
+        // Apply the saved theme, or the OS preference, before first paint.
         var saved = null;
         try {
           saved = localStorage.getItem("theme");
@@ -30,9 +32,29 @@ const { title = site.title } = Astro.props;
         var dark = saved
           ? saved === "dark"
           : matchMedia("(prefers-color-scheme: dark)").matches;
-        var root = document.documentElement;
         root.classList.toggle("dark-theme", dark);
         root.classList.toggle("light-theme", !dark);
+
+        // Room mode: only when WebGL works. Without it the page renders as
+        // plain HTML. The room island takes it from here and drops back to
+        // plain HTML itself if the model fails to load.
+        try {
+          var gl =
+            document.createElement("canvas").getContext("webgl2") ||
+            document.createElement("canvas").getContext("webgl");
+          if (!gl) return;
+          var lose = gl.getExtension("WEBGL_lose_context");
+          if (lose) lose.loseContext();
+        } catch (e) {
+          return;
+        }
+        root.classList.add("has-room", "is-locked");
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
+        // If the room's code never arrives, don't leave the loader up forever.
+        setTimeout(function () {
+          if (!root.dataset.room) root.classList.remove("has-room", "is-locked");
+        }, 20000);
       })();
     </script>
   </head>

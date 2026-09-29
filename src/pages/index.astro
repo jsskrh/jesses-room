@@ -2,6 +2,8 @@
 import { getCollection, getEntry, render } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Hero from "../components/Hero.astro";
+import Preloader from "../components/Preloader.astro";
+import Room from "../components/room/Room";
 import Section from "../components/Section.astro";
 import ToggleBar from "../components/ToggleBar.astro";
 import "../styles/page.css";
@@ -22,6 +24,8 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
 ---
 
 <Base>
+  <Preloader />
+  <Room client:only="react" />
   <div class="page">
     <ToggleBar />
     <main class="page-wrapper">

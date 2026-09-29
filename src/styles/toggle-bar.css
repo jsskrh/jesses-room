@@ -9,6 +9,11 @@
   z-index: 9999999;
 }
 
+/* Faded in by the room's intro. */
+.has-room .toggle-bar {
+  opacity: 0;
+}
+
 .sun-container,
 .moon-container {
   display: flex;

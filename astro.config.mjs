@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from "astro/config";
+import react from "@astrojs/react";
 import { satteri } from "@astrojs/markdown-satteri";
 import { defineHastPlugin } from "satteri";
 
@@ -21,6 +22,7 @@ const externalLinks = defineHastPlugin({
 // https://astro.build/config
 export default defineConfig({
   site: "https://jesses-room.vercel.app",
+  integrations: [react()],
   markdown: {
     // Smart punctuation off: keep the copy's straight quotes as written.
     processor: satteri({
