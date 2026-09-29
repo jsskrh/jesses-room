@@ -6,7 +6,8 @@ import { isMobileLayout, setRoomState, unlockScroll } from "./mode";
 export interface IntroTargets {
   room: THREE.Object3D;
   nodes: RoomNodes;
-  floor: THREE.Object3D;
+  // The large ground plane under the room (not the model's Floor platform).
+  plane: THREE.Object3D;
   // The intro's full turn of the room; kept apart from the mouse tilt so
   // the two add up instead of fighting over rotation.y.
   spin: { y: number };
@@ -54,7 +55,7 @@ function splitChars(el: HTMLElement) {
     const span = document.createElement("span");
     span.setAttribute("aria-hidden", "true");
     if (char === " ") {
-      span.textContent = " ";
+      span.textContent = "\u00a0"; // non-breaking space
     } else {
       span.className = "animate-this";
       span.textContent = char;
@@ -96,7 +97,7 @@ function firstIntro({ room }: IntroTargets, mobile: boolean) {
 }
 
 // The box opens and the room builds itself, then the hero text slides in.
-function secondIntro({ room, nodes, floor, spin }: IntroTargets) {
+function secondIntro({ room, nodes, plane, spin }: IntroTargets) {
   const mobile = isMobileLayout();
   const size = mobile ? 0.06 : 0.11;
   const scale = (name: string) => nodes[name].scale;
@@ -110,7 +111,7 @@ function secondIntro({ room, nodes, floor, spin }: IntroTargets) {
     .to(room.position, { x: mobile ? -0.1 : 0, y: 0, z: mobile ? -1 : 0, ease: "power1.out", duration: 0.7 }, "start")
     .to(spin, { y: 2 * Math.PI, duration: 0.7 }, "start")
     .to(room.scale, { x: size, y: size, z: size, duration: 0.7 }, "start")
-    .to(floor.position, { y: -0.4, duration: 0.7 }, "start")
+    .to(plane.position, { y: -0.4, duration: 0.7 }, "start")
     .to(scale("cube"), shrink, ">+=0.1")
     .to(scale("false_wall"), shrink, "<")
     .to(scale("table"), pop)
@@ -151,11 +152,12 @@ function secondIntro({ room, nodes, floor, spin }: IntroTargets) {
   return tl;
 }
 
-// Runs the whole intro. Returns a cleanup function.
-export function playIntro(targets: IntroTargets) {
+// Runs the whole intro. `onUnlock` fires when the first part ends and the
+// page can scroll. Returns a cleanup function.
+export function playIntro(targets: IntroTargets, onUnlock: () => void) {
   const mobile = isMobileLayout();
   if (mobile) targets.room.position.set(-0.05, 0, -1.7);
-  targets.floor.position.y = mobile ? -0.1 : 0.95;
+  targets.plane.position.y = mobile ? -0.1 : 0.95;
 
   for (const selector of HERO_LINES) {
     const el = document.querySelector<HTMLElement>(selector);
@@ -168,6 +170,7 @@ export function playIntro(targets: IntroTargets) {
   const first = firstIntro(targets, mobile).call(() => {
     unlockScroll();
     setRoomState("waiting");
+    onUnlock();
     stopWaiting = onFirstScroll(() => {
       second = secondIntro(targets);
     });

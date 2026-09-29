@@ -76,6 +76,16 @@ html:not(.has-room) .intro-text {
   height: 100vh;
 }
 
+/* The page sits over the room. Let pointer events through its empty areas
+   so the books can be clicked; text and links still take their own. */
+.has-room .page-wrapper {
+  pointer-events: none;
+}
+
+.has-room .page-wrapper :is(.section, .hero-main) {
+  pointer-events: auto;
+}
+
 .hero-main {
   position: absolute;
 }

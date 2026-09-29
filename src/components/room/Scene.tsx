@@ -1,11 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useFrame, useLoader, useThree, type ThreeEvent } from "@react-three/fiber";
 import gsap from "gsap";
 import * as THREE from "three";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { setupBooks, type Bookshelf } from "./books";
 import { playIntro } from "./intro";
 import { prepareRoom } from "./model";
+import { setupScroll } from "./scroll";
 
 const MODEL_URL = "/models/FinalRoomV7.glb";
 
@@ -33,6 +35,10 @@ const CIRCLES = [
   { color: linear(0x95abe5), y: -0.37 },
 ];
 
+// The shelf and the books on it. While a book is out, clicking any of them
+// opens that book's project.
+const SHELF = /^(book_shelf|_?project\d*)$/;
+
 const DAY = { color: { r: 1, g: 1, b: 1 }, sun: 3, ambient: 1 };
 const NIGHT = {
   color: { r: 0.17254901960784313, g: 0.23137254901960785, b: 0.6862745098039216 },
@@ -57,8 +63,11 @@ function FrustumZoom() {
 export default function Scene() {
   const { scene: room } = useLoader(GLTFLoader, MODEL_URL, withDraco);
   const nodes = useMemo(() => prepareRoom(room), [room]);
+  const camera = useThree((state) => state.camera);
 
-  const floor = useRef<THREE.Mesh>(null!);
+  const plane = useRef<THREE.Mesh>(null!);
+  const circles = useRef<THREE.Mesh[]>([]);
+  const shelf = useRef<Bookshelf | null>(null);
   const sun = useRef<THREE.DirectionalLight>(null!);
   const ambient = useRef<THREE.AmbientLight>(null!);
   const spin = useRef({ y: 0 });
@@ -105,10 +114,45 @@ export default function Scene() {
     room.rotation.y = spin.current.y + t.current;
   });
 
-  useEffect(
-    () => playIntro({ room, nodes, floor: floor.current, spin: spin.current }),
-    [room, nodes],
-  );
+  // Intro first; once the page can scroll, the scroll story and the books.
+  useEffect(() => {
+    let stopScroll: (() => void) | undefined;
+    const stopIntro = playIntro({ room, nodes, plane: plane.current, spin: spin.current }, () => {
+      stopScroll = setupScroll({ room, nodes, camera, circles: circles.current });
+      shelf.current = setupBooks(nodes);
+    });
+    return () => {
+      stopIntro();
+      stopScroll?.();
+      shelf.current?.cleanup();
+      shelf.current = null;
+    };
+  }, [room, nodes, camera]);
+
+  // Dev server only: a handle for inspecting the scene from the console.
+  useEffect(() => {
+    if (import.meta.env.DEV) Object.assign(window, { __room: { room, nodes, camera } });
+  }, [room, nodes, camera]);
+
+  const onShelf = (object: THREE.Object3D) => {
+    let node = object;
+    while (node.parent && node.parent !== room) node = node.parent;
+    return SHELF.test(node.name.toLowerCase());
+  };
+
+  // R3F calls these once per object along the pointer ray, nearest first.
+  // Only the nearest counts: stop before the walls behind it get a say.
+  const openBook = (event: ThreeEvent<MouseEvent>) => {
+    event.stopPropagation();
+    const url = shelf.current?.openUrl();
+    if (url && onShelf(event.object)) window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const pointAt = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    const clickable = Boolean(shelf.current?.openUrl()) && onShelf(event.object);
+    document.body.style.cursor = clickable ? "pointer" : "";
+  };
 
   return (
     <>
@@ -125,15 +169,29 @@ export default function Scene() {
       />
       <ambientLight ref={ambient} intensity={DAY.ambient} />
 
-      <primitive object={room} />
+      <primitive
+        object={room}
+        onClick={openBook}
+        onPointerMove={pointAt}
+        onPointerOut={() => (document.body.style.cursor = "")}
+      />
 
-      <mesh ref={floor} rotation-x={Math.PI / 2} receiveShadow>
+      <mesh ref={plane} rotation-x={Math.PI / 2} receiveShadow>
         <planeGeometry args={[100, 100]} />
         <meshStandardMaterial color={FLOOR_COLOR} side={THREE.BackSide} />
       </mesh>
 
-      {CIRCLES.map(({ color, y }) => (
-        <mesh key={y} position-y={y} rotation-x={-Math.PI / 2} scale={0} receiveShadow>
+      {CIRCLES.map(({ color, y }, i) => (
+        <mesh
+          key={y}
+          ref={(mesh) => {
+            if (mesh) circles.current[i] = mesh;
+          }}
+          position-y={y}
+          rotation-x={-Math.PI / 2}
+          scale={0}
+          receiveShadow
+        >
           <circleGeometry args={[5, 64]} />
           <meshStandardMaterial color={color} />
         </mesh>

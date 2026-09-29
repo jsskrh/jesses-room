@@ -49,7 +49,9 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
         {
           projects.map((project) => (
             <>
-              <h3 data-book={project.data.bookNode}>{project.data.title}</h3>
+              <h3 data-book={project.data.bookNode} data-url={project.data.url}>
+                {project.data.title}
+              </h3>
               {project.data.summary.map((paragraph) => (
                 <p>{paragraph}</p>
               ))}
