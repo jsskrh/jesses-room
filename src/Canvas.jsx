@@ -5,7 +5,6 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import GSAP from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { useStateValue } from "./StateProvider";
-import GUI from "lil-gui";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 
 function Canvas({ ready, items, roomObject }) {

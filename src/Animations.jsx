@@ -1067,7 +1067,7 @@ function Animations({ ready, roomObject, children }) {
             // Project is active, open its link
             const projectLink = projectLinks[currentActiveBook];
             if (projectLink) {
-              window.open(projectLink, "_blank");
+              window.open(projectLink, "_blank", "noopener,noreferrer");
             } else {
               console.log("No link found for project:", targetObject.name);
             }
