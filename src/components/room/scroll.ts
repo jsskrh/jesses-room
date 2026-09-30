@@ -210,6 +210,12 @@ export function setupScroll(targets: ScrollTargets) {
       if (immediate) story?.snap();
       else story?.follow();
     },
+    // Hold the page still, e.g. while a book is open.
+    hold(held: boolean) {
+      if (held) lenis?.stop();
+      else lenis?.start();
+      document.documentElement.classList.toggle("is-locked", held);
+    },
     // Scroll straight to an element, centred on screen: for a project, far
     // enough for its book to come out.
     jumpTo(element: HTMLElement) {

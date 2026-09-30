@@ -15,7 +15,7 @@ export function clearSpot() {
   history.replaceState(history.state, "", location.pathname + location.search);
 }
 
-export function rememberSpot(id: string | undefined) {
+function rememberSpot(id: string | undefined) {
   if (id) history.replaceState(history.state, "", `#${id}`);
 }
 
@@ -30,6 +30,8 @@ function headingOf(link: Element) {
 // Remember the spot whenever a link leads to another page of this site.
 export function rememberSpotOnLeaving() {
   const onClick = (event: MouseEvent) => {
+    // Handled on this page, e.g. a case study link that opened its book.
+    if (event.defaultPrevented) return;
     const link = (event.target as Element | null)?.closest?.("a[href]");
     if (!(link instanceof HTMLAnchorElement)) return;
     if (link.origin !== location.origin || link.pathname === location.pathname) return;

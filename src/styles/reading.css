@@ -174,29 +174,6 @@ body {
   color: var(--accent);
 }
 
-/* Case study: role, dates, stack and site. */
-.facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 24px 40px;
-  margin-top: 48px;
-  padding: 32px 0;
-  border-top: 2px solid var(--accent);
-  border-bottom: 2px solid var(--accent);
-}
-
-.facts dt {
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.facts dd {
-  margin-top: 8px;
-  line-height: 1.8;
-}
-
 /* Experience: the résumé download and the timeline of roles. */
 .resume-link {
   display: inline-block;

@@ -2,6 +2,7 @@
 import { existsSync } from "node:fs";
 import { getCollection, getEntry, render } from "astro:content";
 import Base from "../layouts/Base.astro";
+import CaseStudy from "../components/CaseStudy.astro";
 import Hero from "../components/Hero.astro";
 import Preloader from "../components/Preloader.astro";
 import Room from "../components/room/Room";
@@ -56,14 +57,16 @@ const monitor = existsSync(`public${MONITOR_VIDEO}`) ? MONITOR_VIDEO : undefined
         {
           projects.map((project) => (
             <>
-              <h3 id={project.id} data-book={project.data.bookNode} data-href={caseStudy(project.id)}>
+              <h3 id={project.id} data-book={project.data.bookNode}>
                 {project.data.title}
               </h3>
               {project.data.summary.map((paragraph) => (
                 <p>{paragraph}</p>
               ))}
               <p class="project-links">
-                <a href={caseStudy(project.id)}>Read case study →</a>
+                <a href={caseStudy(project.id)} data-read={project.id}>
+                  Read case study →
+                </a>
                 <a href={project.data.url} target="_blank" rel="noopener noreferrer">
                   Visit site ↗
                 </a>
@@ -92,4 +95,19 @@ const monitor = existsSync(`public${MONITOR_VIDEO}`) ? MONITOR_VIDEO : undefined
       </Section>
     </main>
   </div>
+
+  {/* Each project's case study, laid over its open book's right-hand page. */}
+  {
+    projects.map((project) => (
+      <dialog class="book-page" data-reader={project.id} aria-labelledby={`${project.id}-page`} data-lenis-prevent>
+        <button class="book-page-close" type="button" data-close>
+          Close
+        </button>
+        <div class="book-page-paper section-text works-section">
+          <h2 id={`${project.id}-page`}>{project.data.title}</h2>
+          <CaseStudy project={project} />
+        </div>
+      </dialog>
+    ))
+  }
 </Base>

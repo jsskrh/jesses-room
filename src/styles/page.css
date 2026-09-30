@@ -255,6 +255,59 @@ html.dark-theme:not(.has-room) .room-still {
   font-size: 14px;
 }
 
+/* OPEN BOOK */
+
+/* An open book's right-hand page: the case study, laid over the page in the
+   room. The room's script places and sizes it. */
+.book-page {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text);
+}
+
+.book-page::backdrop {
+  background: transparent;
+}
+
+/* Printed on the book's own page: no background of its own. */
+.book-page-paper {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 64px 10% 48px;
+}
+
+.book-page-paper h2 {
+  font-size: 20px;
+  line-height: 1.8;
+  font-weight: 700;
+}
+
+.book-page-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  z-index: 1;
+  padding: 8px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.book-page-close:hover {
+  color: var(--color-green);
+}
+
 @media (min-width: 969px) {
   .finally-section {
     padding-bottom: 1500px;
@@ -264,6 +317,16 @@ html.dark-theme:not(.has-room) .room-still {
 @media (max-width: 968px) {
   .section {
     width: 100%;
+  }
+
+  /* The text makes way for an open book. */
+  .page-wrapper {
+    transition: opacity 0.4s;
+  }
+
+  .is-reading .page-wrapper {
+    opacity: 0;
+    visibility: hidden;
   }
 
   .hero-main {

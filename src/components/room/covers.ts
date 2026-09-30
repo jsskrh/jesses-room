@@ -34,6 +34,8 @@ export function addCovers(nodes: RoomNodes) {
   return () => {
     removed = true;
     for (const cover of covers) {
+      const front = cover.parent && fronts.get(cover.parent);
+      if (front) delete front.cover;
       cover.removeFromParent();
       cover.geometry.dispose();
       cover.material.map?.dispose();
@@ -42,23 +44,74 @@ export function addCovers(nodes: RoomNodes) {
   };
 }
 
+// A book's front cover, in the book's own space. `place` puts a plane (which
+// faces +z, with +x to the right and +y up) on it, centred, the right way up
+// as the book is seen once it's out. `width` runs from the spine to the fore
+// edge, `height` from top to bottom.
+export interface Front {
+  place: THREE.Matrix4;
+  width: number;
+  height: number;
+  binding: THREE.Mesh;
+  pages: THREE.Mesh;
+  // The printed title, once the font has loaded.
+  cover?: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial>;
+}
+
+const fronts = new WeakMap<THREE.Object3D, Front | null>();
+
 // A book is its binding plus its pages. Seen from the camera once the book
 // is out, its front cover faces +y, with the spine (+z) on the left and +x
 // pointing down. Some books were modelled leaning, turned about z within
 // their own axes, so the faces are found from the shape itself.
-function makeCover(book: THREE.Object3D, title: string) {
+export function frontOf(book: THREE.Object3D): Front | undefined {
+  if (fronts.has(book)) return fronts.get(book) ?? undefined;
+
   const parts = book.children.filter((child): child is THREE.Mesh => child instanceof THREE.Mesh);
   const binding = parts.find((part) => !isPages(part));
   const pages = parts.find(isPages);
-  if (!binding || !pages) return;
+  if (!binding || !pages) {
+    fronts.set(book, null);
+    return;
+  }
 
   const lean = leanOf(binding);
   const upright = new THREE.Matrix4().makeRotationZ(-lean);
   const outer = bounds(binding, upright);
   const inner = bounds(pages, upright);
-  // From the fore edge to where the spine starts.
-  const width = inner.max.z - outer.min.z;
-  const height = outer.max.x - outer.min.x;
+
+  // Face +y, reading along -z with -x up, then lean with the book.
+  const facing = new THREE.Matrix4().makeBasis(
+    new THREE.Vector3(0, 0, -1),
+    new THREE.Vector3(-1, 0, 0),
+    new THREE.Vector3(0, 1, 0),
+  );
+  const place = new THREE.Matrix4()
+    .makeRotationZ(lean)
+    .multiply(
+      new THREE.Matrix4().makeTranslation(
+        (outer.min.x + outer.max.x) / 2,
+        outer.max.y,
+        (outer.min.z + inner.max.z) / 2,
+      ),
+    )
+    .multiply(facing);
+
+  const front = {
+    place,
+    width: inner.max.z - outer.min.z,
+    height: outer.max.x - outer.min.x,
+    binding,
+    pages,
+  };
+  fronts.set(book, front);
+  return front;
+}
+
+function makeCover(book: THREE.Object3D, title: string) {
+  const front = frontOf(book);
+  if (!front) return;
+  const { place, width, height, binding } = front;
 
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(width * RESOLUTION);
@@ -83,25 +136,8 @@ function makeCover(book: THREE.Object3D, title: string) {
   );
   cover.name = "cover";
   cover.receiveShadow = true;
-
-  // The plane faces +z, reading along +x with +y up. Turn it to face +y,
-  // reading along -z with -x up, then lean it with the book.
-  const facing = new THREE.Matrix4().makeBasis(
-    new THREE.Vector3(0, 0, -1),
-    new THREE.Vector3(-1, 0, 0),
-    new THREE.Vector3(0, 1, 0),
-  );
-  const place = new THREE.Matrix4()
-    .makeRotationZ(lean)
-    .multiply(
-      new THREE.Matrix4().makeTranslation(
-        (outer.min.x + outer.max.x) / 2,
-        outer.max.y,
-        (outer.min.z + inner.max.z) / 2,
-      ),
-    )
-    .multiply(facing);
   place.decompose(cover.position, cover.quaternion, cover.scale);
+  front.cover = cover;
   return cover;
 }
 

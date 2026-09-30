@@ -1,0 +1,51 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+
+// A project's case study: its summary, the facts about it and the write-up.
+// Shown on the project's own page and on its book's page in the room.
+interface Props {
+  project: CollectionEntry<"projects">;
+}
+
+const { project } = Astro.props;
+const { summary, url, role, period, stack } = project.data;
+const { Content } = await render(project);
+const host = new URL(url).hostname.replace(/^www\./, "");
+---
+
+{summary.map((paragraph) => <p>{paragraph}</p>)}
+
+<dl class="facts">
+  {
+    role && (
+      <div>
+        <dt>Role</dt>
+        <dd>{role}</dd>
+      </div>
+    )
+  }
+  {
+    period && (
+      <div>
+        <dt>When</dt>
+        <dd>{period}</dd>
+      </div>
+    )
+  }
+  {
+    stack && (
+      <div>
+        <dt>Stack</dt>
+        <dd>{stack.join(", ")}</dd>
+      </div>
+    )
+  }
+  <div>
+    <dt>Site</dt>
+    <dd>
+      <a href={url} target="_blank" rel="noopener noreferrer">{host} ↗</a>
+    </dd>
+  </div>
+</dl>
+
+<Content />
