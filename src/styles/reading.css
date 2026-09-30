@@ -1,0 +1,274 @@
+/* The case study and experience pages: one section card on the colour the
+   room's backdrop has on the home page. */
+
+.light-theme {
+  --backdrop: #e9e9e7;
+}
+
+.dark-theme {
+  --backdrop: #7282ba;
+}
+
+html,
+body {
+  background-color: var(--backdrop);
+}
+
+.accent-pink {
+  --accent: var(--color-primary);
+}
+
+.accent-green {
+  --accent: var(--color-green);
+}
+
+.reading {
+  padding: 48px 24px 160px;
+}
+
+.back-link {
+  display: inline-block;
+  margin: 0 0 48px max(0px, calc((100% - 880px) / 2));
+  padding: 8px 0;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  color: var(--color-primary);
+}
+
+.reading-card {
+  position: relative;
+  max-width: 880px;
+  margin: 0 auto;
+  background-color: var(--section-bg);
+  border-top-right-radius: 10px;
+  overflow: hidden;
+}
+
+/* The card arrives with the home sections' sweeping corner, which flattens
+   as you start reading, as theirs does. Browsers without scroll-driven
+   animations show it flat. */
+/* The timelines are set in rules of their own: the build's CSS minifier
+   folds a timeline into the `animation` shorthand, which browsers reject. */
+@supports (animation-timeline: scroll()) {
+  .reading-card {
+    animation: reading-corner linear both;
+  }
+
+  .reading .reading-card {
+    animation-timeline: scroll(root);
+    animation-range: 0 60vh;
+  }
+}
+
+@keyframes reading-corner {
+  from {
+    border-top-right-radius: 700px 700px;
+  }
+  to {
+    border-top-right-radius: 10px 10px;
+  }
+}
+
+/* Fills as you read, like the home page's section bars. Browsers without
+   scroll-driven animations show it full. */
+.reading-card .progress-wrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+}
+
+.reading-card .progress-bar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background-color: var(--accent);
+  transform-origin: top center;
+  animation: reading-progress linear both;
+}
+
+.reading .reading-card .progress-bar {
+  animation-timeline: scroll(root);
+}
+
+@keyframes reading-progress {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* The skewed title and its bars grow with the title (--chars, its length,
+   rounded up to a title-* step) and shrink to fit narrow screens. Skewed by
+   25deg, each rises or falls by 0.47 of its width, which sets the header's
+   height. */
+.title-8 {
+  --chars: 8;
+}
+
+.title-12 {
+  --chars: 12;
+}
+
+.title-16 {
+  --chars: 16;
+}
+
+.title-20 {
+  --chars: 20;
+}
+
+.title-24 {
+  --chars: 24;
+}
+
+.reading-card .section-header {
+  height: auto;
+  padding: 64px 10% 0;
+  container-type: inline-size;
+}
+
+.reading-card .header-top {
+  --bar: max(278px, calc(var(--chars) * 0.8em + 24px));
+  font-size: min(40px, calc((100cqi - 24px) / (var(--chars) * 0.8)));
+  height: calc(140px + var(--bar) * 0.47);
+  margin-top: calc(var(--bar) * 0.47);
+}
+
+.reading-card .section-title-text {
+  font-size: 1em;
+}
+
+.reading-card .section-title-decoration {
+  max-width: 100%;
+  width: var(--bar);
+}
+
+.reading-card .section-content {
+  padding: 96px 10% 120px;
+}
+
+.reading-card .section-text h2 {
+  font-size: 20px;
+  line-height: 1.8;
+  font-weight: 700;
+  margin-top: 64px;
+}
+
+.reading-card .section-text :is(ul, ol) {
+  margin-top: 18px;
+  padding-left: 1.25em;
+  line-height: 2;
+}
+
+.reading-card .section-text li + li {
+  margin-top: 8px;
+}
+
+.reading-card .section-text li::marker {
+  color: var(--accent);
+}
+
+/* Case study: role, dates, stack and site. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px 40px;
+  margin-top: 48px;
+  padding: 32px 0;
+  border-top: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+
+.facts dt {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.facts dd {
+  margin-top: 8px;
+  line-height: 1.8;
+}
+
+/* Experience: the résumé download and the timeline of roles. */
+.resume-link {
+  display: inline-block;
+  font-weight: 500;
+}
+
+.timeline {
+  list-style: none;
+  margin-top: 64px;
+  padding: 0;
+  border-left: 2px solid var(--accent);
+}
+
+.timeline > li {
+  position: relative;
+  padding: 0 0 64px 40px;
+}
+
+.timeline > li:last-child {
+  padding-bottom: 0;
+}
+
+.timeline > li::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--accent);
+}
+
+.timeline-period {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.reading-card .section-text .timeline-period {
+  margin-top: 0;
+  line-height: 1.8;
+}
+
+.reading-card .section-text .timeline h2 {
+  margin-top: 8px;
+}
+
+.reading-card .section-text .timeline-company {
+  margin-top: 0;
+  font-weight: 500;
+}
+
+@media (max-width: 968px) {
+  .reading {
+    padding: 88px 0 96px;
+  }
+
+  .back-link {
+    margin: 0 0 32px 24px;
+  }
+
+  .reading-card .section-header {
+    padding: 48px 8% 0;
+  }
+
+  .reading-card .section-content {
+    padding: 64px 8% 96px;
+  }
+
+  .timeline > li {
+    padding-left: 28px;
+  }
+}

@@ -1,0 +1,63 @@
+---
+import ToggleBar from "../components/ToggleBar.astro";
+import Base from "./Base.astro";
+import "../styles/section.css";
+import "../styles/reading.css";
+
+// A plain reading page: one section card, as on the home page, with no room
+// behind it. Used by the case studies and the experience timeline.
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+  accent: "pink" | "green";
+  // The spot on the home page this page belongs to, e.g. "/#proxze".
+  back: string;
+}
+
+const { title, description, heading, accent, back } = Astro.props;
+
+// The header sizes itself to the title's length, in steps: the site's CSP
+// doesn't allow inline style attributes.
+const titleSize = [8, 12, 16, 20, 24].find((chars) => heading.length <= chars) ?? 24;
+---
+
+<Base title={title} description={description}>
+  <ToggleBar />
+  <div class="reading">
+    <a class="back-link" href={back} data-back>← Back to the room</a>
+    <main class:list={["reading-card", `accent-${accent}`]}>
+      <div class="progress-wrapper" aria-hidden="true">
+        <div class="progress-bar"></div>
+      </div>
+      <div class:list={["section-header", `title-${titleSize}`]}>
+        <div class="header-top">
+          <h1 class="section-title-text">{heading}</h1>
+          <div class="section-title-decoration bar-one"></div>
+          <div class="section-title-decoration bar-two"></div>
+          <div class="section-title-decoration bar-three"></div>
+        </div>
+      </div>
+      <div class="section-content">
+        <div class="section-text">
+          <slot />
+        </div>
+      </div>
+    </main>
+  </div>
+</Base>
+
+<script>
+  // Arrived from the room: go back in history rather than loading the room
+  // afresh, so the browser can bring it back exactly as it was left.
+  document.querySelector("[data-back]")?.addEventListener("click", (event) => {
+    let from: URL | undefined;
+    try {
+      from = new URL(document.referrer);
+    } catch {}
+    if (from?.origin === location.origin && from.pathname === "/" && history.length > 1) {
+      event.preventDefault();
+      history.back();
+    }
+  });
+</script>

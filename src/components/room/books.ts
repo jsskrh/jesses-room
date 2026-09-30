@@ -6,21 +6,23 @@ import type { RoomNodes } from "./model";
 gsap.registerPlugin(ScrollTrigger);
 
 export interface Bookshelf {
-  // Link for the book that is out right now, if any.
-  openUrl(): string | undefined;
+  // The book that is out right now, if any: its heading's id and the page
+  // it opens (the project's case study).
+  open(): { id: string; href: string } | undefined;
   cleanup(): void;
 }
 
 // A book pops off the shelf when its project heading reaches the middle of
 // the screen, and goes back when another takes its place or you scroll out
-// of the project list. Headings carry the book's node name in data-book.
+// of the project list. Headings carry the book's node name in data-book and
+// the page it opens in data-href.
 export function setupBooks(nodes: RoomNodes): Bookshelf {
   const entries = gsap.utils
     .toArray<HTMLElement>("[data-book]")
     .map((heading) => ({
       heading,
       key: heading.dataset.book!.toLowerCase(),
-      url: heading.dataset.url,
+      href: heading.dataset.href,
     }))
     .filter(({ key }) => nodes[key]);
 
@@ -80,9 +82,18 @@ export function setupBooks(nodes: RoomNodes): Bookshelf {
     });
   };
 
+  // Settled after the triggers have all had their say: a jump past several
+  // projects at once (a fast flick, or arriving from a case study) fires
+  // theirs in one go, and only the last one should come out.
+  let queued = false;
   const want = (key: string | null) => {
     wanted = key;
-    sync();
+    if (queued) return;
+    queued = true;
+    queueMicrotask(() => {
+      queued = false;
+      sync();
+    });
   };
 
   const context = gsap.context(() => {
@@ -116,7 +127,10 @@ export function setupBooks(nodes: RoomNodes): Bookshelf {
   });
 
   return {
-    openUrl: () => entries.find(({ key }) => key === shown)?.url,
+    open: () => {
+      const entry = entries.find(({ key }) => key === shown);
+      return entry?.href ? { id: entry.heading.id, href: entry.href } : undefined;
+    },
     cleanup: () => {
       context.revert();
       running.forEach((tl) => tl.kill());

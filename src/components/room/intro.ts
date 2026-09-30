@@ -155,7 +155,10 @@ function secondIntro({ room, nodes, plane, spin }: IntroTargets, onSettled: () =
   return tl;
 }
 
-interface IntroEvents {
+interface IntroOptions {
+  // Go straight to the finished room, as when coming back to it from
+  // another page.
+  skip: boolean;
   // The first part has ended and the page can scroll.
   onUnlock: () => void;
   // The second part has put the room in place; scroll can move it now.
@@ -163,7 +166,7 @@ interface IntroEvents {
 }
 
 // Runs the whole intro. Returns a cleanup function.
-export function playIntro(targets: IntroTargets, { onUnlock, onSettled }: IntroEvents) {
+export function playIntro(targets: IntroTargets, { skip, onUnlock, onSettled }: IntroOptions) {
   const mobile = isMobileLayout();
   if (mobile) targets.room.position.set(-0.05, 0, -1.7);
   targets.plane.position.y = mobile ? -0.1 : 0.95;
@@ -173,9 +176,9 @@ export function playIntro(targets: IntroTargets, { onUnlock, onSettled }: IntroE
     if (el) splitChars(el);
   }
 
-  // With reduced motion, skip straight to the finished room instead of
+  // With reduced motion too, skip straight to the finished room instead of
   // animating it together and waiting for a scroll in between.
-  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const instant = skip || matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   let second: gsap.core.Timeline | undefined;
   let stopWaiting: (() => void) | undefined;
@@ -184,7 +187,7 @@ export function playIntro(targets: IntroTargets, { onUnlock, onSettled }: IntroE
     unlockScroll();
     setRoomState("waiting");
     onUnlock();
-    if (reducedMotion) {
+    if (instant) {
       second = secondIntro(targets, onSettled).progress(1);
       return;
     }
@@ -192,7 +195,7 @@ export function playIntro(targets: IntroTargets, { onUnlock, onSettled }: IntroE
       second = secondIntro(targets, onSettled);
     });
   });
-  if (reducedMotion) first.progress(1);
+  if (instant) first.progress(1);
 
   return () => {
     stopWaiting?.();

@@ -1,0 +1,56 @@
+---
+import { existsSync } from "node:fs";
+import { getCollection, render } from "astro:content";
+import Reading from "../layouts/Reading.astro";
+import { site } from "../site";
+
+// The PDF is offered only once it's in public/.
+const RESUME = "/jesse-akorah-resume.pdf";
+const hasResume = existsSync(`public${RESUME}`);
+
+const roles = await Promise.all(
+  (await getCollection("experience"))
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (role) => ({ ...role.data, Content: (await render(role)).Content })),
+);
+---
+
+<Reading
+  title={`Experience · ${site.title}`}
+  description={`${site.name}'s roles and experience as a software engineer.`}
+  heading="Experience"
+  accent="pink"
+  back="/#professional-experience"
+>
+  {
+    hasResume && (
+      <p>
+        <a class="resume-link" href={RESUME} download>
+          Download my résumé (PDF)
+        </a>
+      </p>
+    )
+  }
+
+  <ol class="timeline">
+    {
+      roles.map(({ company, role, period, location, url, Content }) => (
+        <li>
+          <p class="timeline-period">{period}</p>
+          <h2>{role}</h2>
+          <p class="timeline-company">
+            {url ? (
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                {company}
+              </a>
+            ) : (
+              company
+            )}
+            {location && ` · ${location}`}
+          </p>
+          <Content />
+        </li>
+      ))
+    }
+  </ol>
+</Reading>

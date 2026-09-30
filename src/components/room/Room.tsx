@@ -37,7 +37,12 @@ class RoomErrorBoundary extends Component<{ children: ReactNode }, { failed: boo
   }
 }
 
-export default function Room() {
+interface RoomProps {
+  // A video for the monitor's screen.
+  monitor?: string;
+}
+
+export default function Room({ monitor }: RoomProps) {
   if (!inRoomMode()) return null;
 
   return (
@@ -51,7 +56,7 @@ export default function Room() {
           gl={{ antialias: true, toneMapping: THREE.CineonToneMapping, toneMappingExposure: 1.75 }}
         >
           <Suspense fallback={null}>
-            <Scene />
+            <Scene monitor={monitor} />
           </Suspense>
         </Canvas>
       </div>

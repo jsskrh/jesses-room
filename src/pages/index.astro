@@ -1,4 +1,5 @@
 ---
+import { existsSync } from "node:fs";
 import { getCollection, getEntry, render } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Hero from "../components/Hero.astro";
@@ -21,11 +22,16 @@ const Contact = await homeSection("contact");
 const Finally = await homeSection("finally");
 
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+const caseStudy = (id: string) => `/projects/${id}/`;
+
+// The monitor plays this recording once it's in public/.
+const MONITOR_VIDEO = "/media/monitor.mp4";
+const monitor = existsSync(`public${MONITOR_VIDEO}`) ? MONITOR_VIDEO : undefined;
 ---
 
-<Base>
+<Base room>
   <Preloader />
-  <Room client:only="react" />
+  <Room client:only="react" monitor={monitor} />
   <div class="room-still" aria-hidden="true"></div>
   <div class="page">
     <ToggleBar />
@@ -50,12 +56,18 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
         {
           projects.map((project) => (
             <>
-              <h3 data-book={project.data.bookNode} data-url={project.data.url}>
+              <h3 id={project.id} data-book={project.data.bookNode} data-href={caseStudy(project.id)}>
                 {project.data.title}
               </h3>
               {project.data.summary.map((paragraph) => (
                 <p>{paragraph}</p>
               ))}
+              <p class="project-links">
+                <a href={caseStudy(project.id)}>Read case study →</a>
+                <a href={project.data.url} target="_blank" rel="noopener noreferrer">
+                  Visit site ↗
+                </a>
+              </p>
             </>
           ))
         }

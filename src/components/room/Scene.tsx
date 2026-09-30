@@ -5,9 +5,12 @@ import * as THREE from "three";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { setupBooks, type Bookshelf } from "./books";
+import { addCovers } from "./covers";
 import { playIntro } from "./intro";
 import { prepareRoom } from "./model";
+import { playOnMonitor } from "./monitor";
 import { setupScroll } from "./scroll";
+import { arrivalSpot, clearSpot, rememberSpot, rememberSpotOnLeaving } from "./spot";
 
 const MODEL_URL = "/models/room.glb";
 
@@ -42,7 +45,7 @@ const CIRCLES = [
 ];
 
 // The shelf and the books on it. While a book is out, clicking any of them
-// opens that book's project.
+// opens that book's case study.
 const SHELF = /^(book_shelf|_?project\d*)$/;
 
 const DAY = { color: { r: 1, g: 1, b: 1 }, sun: 3, ambient: 1 };
@@ -66,7 +69,12 @@ function FrustumZoom() {
   return null;
 }
 
-export default function Scene() {
+interface SceneProps {
+  // A video for the monitor's screen.
+  monitor?: string;
+}
+
+export default function Scene({ monitor }: SceneProps) {
   const { scene: room } = use(loadRoom());
   const nodes = useMemo(() => prepareRoom(room), [room]);
   const camera = useThree((state) => state.camera);
@@ -120,26 +128,42 @@ export default function Scene() {
     room.rotation.y = spin.current.y + t.current;
   });
 
-  // Intro first; once the page can scroll, the scroll story and the books.
+  useEffect(() => addCovers(nodes), [nodes]);
+  useEffect(() => rememberSpotOnLeaving(), []);
+
+  // Intro first; once the page can scroll, the scroll story and the books,
+  // then the monitor. Coming back from another page, straight to the spot
+  // that was left.
   useEffect(() => {
+    const spot = arrivalSpot();
     let scroll: ReturnType<typeof setupScroll> | undefined;
+    let stopMonitor: (() => void) | undefined;
     const stopIntro = playIntro(
       { room, nodes, plane: plane.current, spin: spin.current },
       {
+        skip: Boolean(spot),
         onUnlock: () => {
           scroll = setupScroll({ room, nodes, camera, circles: circles.current });
           shelf.current = setupBooks(nodes);
+          if (spot) {
+            scroll.jumpTo(spot);
+            clearSpot();
+          }
         },
-        onSettled: () => scroll?.startStory(),
+        onSettled: () => {
+          scroll?.startStory({ immediate: Boolean(spot) });
+          if (monitor) stopMonitor = playOnMonitor(nodes, monitor);
+        },
       },
     );
     return () => {
       stopIntro();
+      stopMonitor?.();
       scroll?.cleanup();
       shelf.current?.cleanup();
       shelf.current = null;
     };
-  }, [room, nodes, camera]);
+  }, [room, nodes, camera, monitor]);
 
   // Dev server only: a handle for inspecting (and rendering) the scene from
   // the console.
@@ -147,7 +171,7 @@ export default function Scene() {
   useEffect(() => {
     if (!import.meta.env.DEV) return;
     const { gl, scene } = getState();
-    Object.assign(window, { __room: { room, nodes, camera, gsap, gl, scene } });
+    Object.assign(window, { __room: { room, nodes, camera, gsap, gl, scene, playOnMonitor } });
   }, [room, nodes, camera, getState]);
 
   const onShelf = (object: THREE.Object3D) => {
@@ -160,13 +184,15 @@ export default function Scene() {
   // Only the nearest counts: stop before the walls behind it get a say.
   const openBook = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
-    const url = shelf.current?.openUrl();
-    if (url && onShelf(event.object)) window.open(url, "_blank", "noopener,noreferrer");
+    const book = shelf.current?.open();
+    if (!book || !onShelf(event.object)) return;
+    rememberSpot(book.id);
+    location.assign(book.href);
   };
 
   const pointAt = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
-    const clickable = Boolean(shelf.current?.openUrl()) && onShelf(event.object);
+    const clickable = Boolean(shelf.current?.open()) && onShelf(event.object);
     document.body.style.cursor = clickable ? "pointer" : "";
   };
 

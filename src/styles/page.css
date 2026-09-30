@@ -242,120 +242,17 @@ html.dark-theme:not(.has-room) .room-still {
   background-color: var(--color-cream);
 }
 
-/* Section header */
-
-.section-header {
-  position: relative;
-  width: 100%;
-  height: 84vh;
-  padding: 30% 10% 0;
-  border-bottom: 2px solid;
-  color: var(--accent);
-  border-color: var(--accent);
-  transition:
-    color 0.3s cubic-bezier(0.33, 0.25, 0.07, 0.97),
-    background-color 0.3s cubic-bezier(0.33, 0.25, 0.07, 0.97);
-  text-transform: uppercase;
+/* Under each project: its case study and its live site. */
+.section-text .project-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px 40px;
+  margin-top: 28px;
 }
 
-.header-top {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.section-title-text {
-  position: absolute;
-  display: block;
-  overflow: hidden;
-  font-size: 40px;
-  font-weight: 500;
-  transform-origin: left;
-  transform: skewY(25deg) translateZ(0);
-  z-index: 2;
-  top: 0;
-  left: 0;
-}
-
-.section-title-decoration {
-  position: absolute;
-  display: block;
-  width: 100%;
-  max-width: 278px;
-  height: 60px;
-  left: 0;
-  border: 1px solid;
-  color: var(--accent);
-  border-color: var(--accent);
-  transform-origin: left;
-  transform: skewY(-25deg) translateZ(0);
-}
-
-.section-title-decoration.bar-one {
-  top: 0;
-}
-
-.section-title-decoration.bar-two {
-  top: 80px;
-}
-
-.section-title-decoration.bar-three {
-  top: 80px;
-  background-color: var(--accent);
-  transform: skewY(25deg) translateZ(0);
-}
-
-.section-number {
-  position: absolute;
-  display: block;
-  bottom: 24px;
-  right: 0;
-  font-size: 24px;
-  font-weight: 300;
-  line-height: 1;
-}
-
-/* Section content. Headings, paragraphs and links come from Markdown, so they
-   are styled by element rather than by class. */
-
-.section-content {
-  width: 100%;
-  padding: 160px 8% 24px;
-}
-
-.section-text h3 {
-  font-size: 20px;
-  line-height: 1.8;
-  font-weight: 700;
-  margin-top: 80px;
-}
-
-.section-text h3:first-child {
-  margin-top: 0;
-}
-
-.section-text p {
-  line-height: 2;
-  margin-top: 18px;
-}
-
-.section-text a {
-  position: relative;
-}
-
-.section-text a:hover {
-  color: var(--accent);
-}
-
-.section-text a::after {
-  position: absolute;
-  content: "";
-  width: 100%;
-  top: 20px;
-  height: 2px;
-  left: 0;
-  right: 0;
-  background-color: var(--accent);
+.section-text .project-links a:last-child {
+  font-size: 14px;
 }
 
 @media (min-width: 969px) {

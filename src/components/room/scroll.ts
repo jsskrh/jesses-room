@@ -74,15 +74,23 @@ function mobileStory({ room, camera, circles }: ScrollTargets) {
 // target the way ScrollTrigger's `scrub: 0.6` did.
 function driveStory(story: gsap.core.Timeline, live: () => boolean) {
   let chase: gsap.core.Tween | undefined;
+  const triggers: ScrollTrigger[] = [];
+  const scrolled = () => triggers.reduce((sum, trigger) => sum + trigger.progress, 0);
+
   // Defined before the triggers: created mid-page (e.g. on switching to the
   // mobile layout), a trigger calls onUpdate straight away.
   const follow = () => {
     if (!live()) return;
-    const time = triggers.reduce((sum, trigger) => sum + trigger.progress, 0);
-    chase = gsap.to(story, { time, duration: 0.6, ease: "expo", overwrite: true });
+    chase = gsap.to(story, { time: scrolled(), duration: 0.6, ease: "expo", overwrite: true });
   };
 
-  const triggers: ScrollTrigger[] = [];
+  // No easing: straight to where the page is, e.g. after jumping to a spot.
+  const snap = () => {
+    if (!live()) return;
+    chase?.kill();
+    story.time(scrolled());
+  };
+
   for (const spacer of SPACERS) {
     triggers.push(
       ScrollTrigger.create({
@@ -105,6 +113,7 @@ function driveStory(story: gsap.core.Timeline, live: () => boolean) {
 
   return {
     follow,
+    snap,
     stop: () => {
       ScrollTrigger.removeEventListener("refresh", refresh);
       chase?.kill();
@@ -195,9 +204,21 @@ export function setupScroll(targets: ScrollTargets) {
   const shared = gsap.context(() => everyLayout(targets));
 
   return {
-    startStory() {
+    // `immediate` puts the room where the scroll is without easing it there.
+    startStory({ immediate = false } = {}) {
       live = true;
-      story?.follow();
+      if (immediate) story?.snap();
+      else story?.follow();
+    },
+    // Scroll straight to an element, centred on screen: for a project, far
+    // enough for its book to come out.
+    jumpTo(element: HTMLElement) {
+      ScrollTrigger.refresh();
+      const box = element.getBoundingClientRect();
+      const y = Math.max(0, window.scrollY + box.top + box.height / 2 - innerHeight / 2 + 1);
+      if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+      else window.scrollTo(0, y);
+      ScrollTrigger.update();
     },
     cleanup() {
       layouts.revert();

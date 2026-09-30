@@ -1,0 +1,64 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import Reading from "../../layouts/Reading.astro";
+import { site } from "../../site";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+  return projects.map((project) => ({ params: { id: project.id }, props: { project } }));
+}
+
+interface Props {
+  project: CollectionEntry<"projects">;
+}
+
+const { project } = Astro.props;
+const { title, summary, url, role, period, stack } = project.data;
+const { Content } = await render(project);
+const host = new URL(url).hostname.replace(/^www\./, "");
+---
+
+<Reading
+  title={`${title} · ${site.title}`}
+  description={summary[0]}
+  heading={title}
+  accent="green"
+  back={`/#${project.id}`}
+>
+  {summary.map((paragraph) => <p>{paragraph}</p>)}
+
+  <dl class="facts">
+    {
+      role && (
+        <div>
+          <dt>Role</dt>
+          <dd>{role}</dd>
+        </div>
+      )
+    }
+    {
+      period && (
+        <div>
+          <dt>When</dt>
+          <dd>{period}</dd>
+        </div>
+      )
+    }
+    {
+      stack && (
+        <div>
+          <dt>Stack</dt>
+          <dd>{stack.join(", ")}</dd>
+        </div>
+      )
+    }
+    <div>
+      <dt>Site</dt>
+      <dd>
+        <a href={url} target="_blank" rel="noopener noreferrer">{host} ↗</a>
+      </dd>
+    </div>
+  </dl>
+
+  <Content />
+</Reading>
