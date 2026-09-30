@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { CSS3DObject, CSS3DRenderer } from "three/addons/renderers/CSS3DRenderer.js";
 import type { RoomNodes } from "./model";
 
-// A YouTube clip playing on the monitor, muted and looping between two
-// points. A cross-origin player can't be drawn into WebGL, so it sits in a
+// A YouTube clip playing on the monitor, muted, without captions, and
+// looping between two points. A cross-origin player can't be drawn into WebGL, so it sits in a
 // layer behind the canvas, turned and sized to match the screen, and the
 // screen is drawn as a hole to see it through. Anything in front of the
 // monitor still hides it.
@@ -39,6 +39,7 @@ export function playOnMonitor(
     playsinline: "1",
     rel: "0",
     iv_load_policy: "3",
+    cc_load_policy: "0",
     start: String(clip.from),
     end: String(clip.to),
     enablejsapi: "1",
@@ -77,10 +78,26 @@ export function playOnMonitor(
   const hole = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0, blending: THREE.NoBlending });
   screen.material = hole;
 
-  // Loops from `to` back to `from`. The player reports its state once told
-  // someone is listening; state 0 means it reached the end.
+  // The player reports its state and time once told someone is listening,
+  // and takes commands the same way.
   const post = (message: object) => iframe.contentWindow?.postMessage(JSON.stringify(message), PLAYER);
+  const command = (func: string, ...args: unknown[]) => post({ event: "command", func, args });
   const onLoad = () => post({ event: "listening", id: 1, channel: "widget" });
+
+  const loop = () => {
+    command("seekTo", clip.from, true);
+    command("playVideo");
+  };
+  // Muted, YouTube turns captions on. They can only be turned off once
+  // they've loaded, after playback starts, so again a moment later.
+  let captionsOff: ReturnType<typeof setTimeout> | undefined;
+  const hideCaptions = () => {
+    command("unloadModule", "captions");
+    clearTimeout(captionsOff);
+    captionsOff = setTimeout(() => command("unloadModule", "captions"), 1000);
+  };
+
+  let state: number | undefined;
   const onMessage = (event: MessageEvent) => {
     if (event.origin !== PLAYER || event.source !== iframe.contentWindow) return;
     let data: { event?: string; info?: unknown } | undefined;
@@ -89,16 +106,20 @@ export function playOnMonitor(
     } catch {
       return;
     }
-    const state =
-      data?.event === "onStateChange"
-        ? data.info
-        : data?.event === "infoDelivery"
-          ? (data.info as { playerState?: number } | undefined)?.playerState
-          : undefined;
-    if (state === 0) {
-      post({ event: "command", func: "seekTo", args: [clip.from, true] });
-      post({ event: "command", func: "playVideo", args: [] });
+    const info = (data?.event === "infoDelivery" ? data.info : undefined) as
+      | { playerState?: number; currentTime?: number }
+      | undefined;
+    const next = data?.event === "onStateChange" ? (data.info as number) : info?.playerState;
+
+    if (next !== undefined && next !== state) {
+      state = next;
+      // 1: playing. 0: ended, at `to`, if the jump below was missed.
+      if (state === 1) hideCaptions();
+      if (state === 0) loop();
     }
+    // Back to the start just before the end, so the player never shows its
+    // end screen.
+    if (info?.currentTime !== undefined && info.currentTime >= clip.to - 0.5) loop();
   };
   iframe.addEventListener("load", onLoad);
   window.addEventListener("message", onMessage);
@@ -116,6 +137,7 @@ export function playOnMonitor(
       renderer.render(scene, camera);
     },
     stop() {
+      clearTimeout(captionsOff);
       window.removeEventListener("message", onMessage);
       iframe.removeEventListener("load", onLoad);
       player.removeFromParent();
