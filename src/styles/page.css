@@ -302,6 +302,24 @@ html.dark-theme:not(.has-room) .room-still {
   font-weight: 700;
 }
 
+.book-page-paper h2:not(:first-child) {
+  margin-top: 48px;
+}
+
+.book-page-paper :is(ul, ol) {
+  margin-top: 18px;
+  padding-left: 1.25em;
+  line-height: 2;
+}
+
+.book-page-paper li + li {
+  margin-top: 8px;
+}
+
+.book-page-paper li::marker {
+  color: var(--accent);
+}
+
 .book-page-close {
   position: absolute;
   top: 16px;
