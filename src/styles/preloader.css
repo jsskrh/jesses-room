@@ -16,10 +16,19 @@ html:not(.has-room) .preloader {
 
 .preloader-wrapper {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 100%;
+}
+
+.preloader-progress {
+  margin-top: 12px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  opacity: 0.6;
 }
 
 .loading {
@@ -54,5 +63,11 @@ html:not(.has-room) .preloader {
   }
   40% {
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circle {
+    animation: none;
   }
 }

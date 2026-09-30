@@ -26,6 +26,7 @@ const projects = (await getCollection("projects")).sort((a, b) => a.data.order -
 <Base>
   <Preloader />
   <Room client:only="react" />
+  <div class="room-still" aria-hidden="true"></div>
   <div class="page">
     <ToggleBar />
     <main class="page-wrapper">

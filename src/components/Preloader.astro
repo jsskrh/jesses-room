@@ -1,8 +1,13 @@
 ---
+import { statSync } from "node:fs";
 import "../styles/preloader.css";
+
+// The room model's real size, so the loader can show true progress even when
+// the download is compressed and the response doesn't say how big it is.
+const modelBytes = statSync("public/models/room.glb").size;
 ---
 
-<div class="preloader" role="status">
+<div class="preloader" role="status" data-model-bytes={modelBytes}>
   <span class="sr-only">Loading the room</span>
   <div class="preloader-wrapper" aria-hidden="true">
     <div class="loading">
@@ -10,5 +15,6 @@ import "../styles/preloader.css";
       <div class="circle"></div>
       <div class="circle"></div>
     </div>
+    <div class="preloader-progress">0%</div>
   </div>
 </div>

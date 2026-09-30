@@ -11,11 +11,13 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "astro": "astro"
+    "astro": "astro",
+    "model": "node scripts/build-model.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.2",
     "@astrojs/react": "^7.0.0",
+    "@astrojs/sitemap": "^3.7.4",
     "@fontsource/montserrat": "^5.3.0",
     "@gsap/react": "^2.1.2",
     "@react-three/fiber": "^9.8.1",
@@ -29,9 +31,15 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
+    "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.186.0",
+    "draco3dgltf": "^1.5.7",
+    "sharp": "^0.35.5",
     "typescript": "^6.0.3"
   }
 }

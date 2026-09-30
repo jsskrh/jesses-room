@@ -97,7 +97,7 @@ function firstIntro({ room }: IntroTargets, mobile: boolean) {
 }
 
 // The box opens and the room builds itself, then the hero text slides in.
-function secondIntro({ room, nodes, plane, spin }: IntroTargets) {
+function secondIntro({ room, nodes, plane, spin }: IntroTargets, onSettled: () => void) {
   const mobile = isMobileLayout();
   const size = mobile ? 0.06 : 0.11;
   const scale = (name: string) => nodes[name].scale;
@@ -149,12 +149,21 @@ function secondIntro({ room, nodes, plane, spin }: IntroTargets) {
     .to(".subheading-two .animate-this", reveal, "<+=0.2")
     .to(".arrow-svg-wrapper", { opacity: 1 });
 
+  // The room has stopped moving and turning; only furniture pops in after.
+  tl.call(onSettled, undefined, "start+=0.7");
+
   return tl;
 }
 
-// Runs the whole intro. `onUnlock` fires when the first part ends and the
-// page can scroll. Returns a cleanup function.
-export function playIntro(targets: IntroTargets, onUnlock: () => void) {
+interface IntroEvents {
+  // The first part has ended and the page can scroll.
+  onUnlock: () => void;
+  // The second part has put the room in place; scroll can move it now.
+  onSettled: () => void;
+}
+
+// Runs the whole intro. Returns a cleanup function.
+export function playIntro(targets: IntroTargets, { onUnlock, onSettled }: IntroEvents) {
   const mobile = isMobileLayout();
   if (mobile) targets.room.position.set(-0.05, 0, -1.7);
   targets.plane.position.y = mobile ? -0.1 : 0.95;
@@ -164,6 +173,10 @@ export function playIntro(targets: IntroTargets, onUnlock: () => void) {
     if (el) splitChars(el);
   }
 
+  // With reduced motion, skip straight to the finished room instead of
+  // animating it together and waiting for a scroll in between.
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   let second: gsap.core.Timeline | undefined;
   let stopWaiting: (() => void) | undefined;
 
@@ -171,10 +184,15 @@ export function playIntro(targets: IntroTargets, onUnlock: () => void) {
     unlockScroll();
     setRoomState("waiting");
     onUnlock();
+    if (reducedMotion) {
+      second = secondIntro(targets, onSettled).progress(1);
+      return;
+    }
     stopWaiting = onFirstScroll(() => {
-      second = secondIntro(targets);
+      second = secondIntro(targets, onSettled);
     });
   });
+  if (reducedMotion) first.progress(1);
 
   return () => {
     stopWaiting?.();

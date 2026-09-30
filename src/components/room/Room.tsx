@@ -2,12 +2,20 @@ import { Component, Suspense, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { inRoomMode, leaveRoomMode, setRoomState } from "./mode";
-import Scene, { preloadRoom } from "./Scene";
+import Scene, { loadRoom } from "./Scene";
 
 if (inRoomMode()) {
   // Tell the head script's watchdog the room's code has arrived.
   setRoomState("booting");
-  preloadRoom();
+
+  const preloader = document.querySelector<HTMLElement>(".preloader");
+  const label = preloader?.querySelector(".preloader-progress");
+  loadRoom(
+    (fraction) => {
+      if (label) label.textContent = `${Math.round(fraction * 100)}%`;
+    },
+    Number(preloader?.dataset.modelBytes) || 0,
+  ).catch(leaveRoomMode);
 }
 
 // If the model or WebGL fails, show the page without the room instead of

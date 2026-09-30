@@ -1,29 +1,35 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { useFrame, useLoader, useThree, type ThreeEvent } from "@react-three/fiber";
+import { use, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import gsap from "gsap";
 import * as THREE from "three";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { setupBooks, type Bookshelf } from "./books";
 import { playIntro } from "./intro";
 import { prepareRoom } from "./model";
 import { setupScroll } from "./scroll";
 
-const MODEL_URL = "/models/FinalRoomV7.glb";
+const MODEL_URL = "/models/room.glb";
 
 // Height of the view in world units, whatever the window size.
 const FRUSTUM = 5;
 
 // Uses the decoder files that ship with three.js, bundled by Vite.
 const draco = new DRACOLoader();
-const withDraco = (loader: GLTFLoader) => {
-  loader.setDRACOLoader(draco);
-};
 
-// Start downloading the model before the canvas mounts. The canvas waits for
-// the tab to be visible, so without this a tab opened in the background only
-// starts loading once someone switches to it.
-export const preloadRoom = () => useLoader.preload(GLTFLoader, MODEL_URL, withDraco);
+// The model downloads once, as soon as the room's code loads: the canvas
+// waits for the tab to be visible, so a tab opened in the background would
+// otherwise only start loading when someone switches to it.
+// `onProgress` gets 0..1. The download may be compressed, so progress is
+// measured against the model's real size (`bytes`), not the response's.
+let request: Promise<GLTF> | undefined;
+export function loadRoom(onProgress?: (fraction: number) => void, bytes = 0) {
+  request ??= new GLTFLoader().setDRACOLoader(draco).loadAsync(MODEL_URL, (event) => {
+    const total = bytes || event.total;
+    if (total) onProgress?.(Math.min(event.loaded / total, 1));
+  });
+  return request;
+}
 
 // The original site set these colours without colour management, so their
 // hex values acted as linear values. Keeping that keeps its look.
@@ -61,7 +67,7 @@ function FrustumZoom() {
 }
 
 export default function Scene() {
-  const { scene: room } = useLoader(GLTFLoader, MODEL_URL, withDraco);
+  const { scene: room } = use(loadRoom());
   const nodes = useMemo(() => prepareRoom(room), [room]);
   const camera = useThree((state) => state.camera);
 
@@ -116,23 +122,33 @@ export default function Scene() {
 
   // Intro first; once the page can scroll, the scroll story and the books.
   useEffect(() => {
-    let stopScroll: (() => void) | undefined;
-    const stopIntro = playIntro({ room, nodes, plane: plane.current, spin: spin.current }, () => {
-      stopScroll = setupScroll({ room, nodes, camera, circles: circles.current });
-      shelf.current = setupBooks(nodes);
-    });
+    let scroll: ReturnType<typeof setupScroll> | undefined;
+    const stopIntro = playIntro(
+      { room, nodes, plane: plane.current, spin: spin.current },
+      {
+        onUnlock: () => {
+          scroll = setupScroll({ room, nodes, camera, circles: circles.current });
+          shelf.current = setupBooks(nodes);
+        },
+        onSettled: () => scroll?.startStory(),
+      },
+    );
     return () => {
       stopIntro();
-      stopScroll?.();
+      scroll?.cleanup();
       shelf.current?.cleanup();
       shelf.current = null;
     };
   }, [room, nodes, camera]);
 
-  // Dev server only: a handle for inspecting the scene from the console.
+  // Dev server only: a handle for inspecting (and rendering) the scene from
+  // the console.
+  const getState = useThree((state) => state.get);
   useEffect(() => {
-    if (import.meta.env.DEV) Object.assign(window, { __room: { room, nodes, camera } });
-  }, [room, nodes, camera]);
+    if (!import.meta.env.DEV) return;
+    const { gl, scene } = getState();
+    Object.assign(window, { __room: { room, nodes, camera, gsap, gl, scene } });
+  }, [room, nodes, camera, getState]);
 
   const onShelf = (object: THREE.Object3D) => {
     let node = object;

@@ -14,65 +14,114 @@ export interface ScrollTargets {
   circles: THREE.Object3D[];
 }
 
-// Scrubs an animation across one of the spacer blocks between sections.
-const across = (margin: string): ScrollTrigger.Vars => ({
-  trigger: margin,
-  start: "top top",
-  end: "bottom bottom",
-  scrub: 0.6,
-  invalidateOnRefresh: true,
-});
+const SPACERS = [
+  ".first-margin",
+  ".second-margin",
+  ".third-margin",
+  ".fourth-margin",
+  ".fifth-margin",
+  ".sixth-margin",
+];
 
 const full = { x: 3, y: 3, z: 3 };
 const popIn = { x: 1, y: 1, z: 1, ease: "back.out(2)", duration: 0.3 };
 const size = (s: number) => ({ x: s, y: s, z: s });
 
-function desktop({ room, camera }: ScrollTargets) {
+// The room and camera's journey down the page, as one timeline: second n is
+// what happens while scrolling through spacer n. One timeline plays its
+// steps in order however far the page jumps (End key, find in page, a fast
+// flick); separate timelines per spacer raced each other over the same
+// values and could leave the camera in the wrong place.
+function desktopStory({ room, camera, circles }: ScrollTargets) {
+  return gsap
+    .timeline({ paused: true, defaults: { duration: 1 } })
+    .to(room.position, { x: () => innerWidth * 0.00145 }, 0)
+    .to(circles[0].scale, full, 0)
+    .to(room.position, { x: 1, y: 0.7, z: () => innerHeight * 0.0055 }, 1)
+    .to(room.scale, size(0.4), 1)
+    .to(circles[1].scale, full, 1)
+    .to(camera.position, { y: 4.7 }, 1)
+    .to(camera.position, { x: 4, y: 3.5 }, 2)
+    .to(camera.position, { x: 2, y: 9.2 }, 3)
+    .to(circles[2].scale, full, 3)
+    .to(camera.position, { x: -3.5, y: -2.3 }, 4)
+    .to(room.position, { y: 0 }, 4)
+    .to(room.position, { x: () => innerWidth * -0.00175, z: 0 }, 5)
+    .to(room.scale, size(0.11), 5)
+    .to(camera.position, { x: 0, y: 4, z: 5 }, 5);
+}
+
+function mobileStory({ room, camera, circles }: ScrollTargets) {
+  return gsap
+    .timeline({ paused: true, defaults: { duration: 1 } })
+    .to(room.scale, size(0.1), 0)
+    .to(circles[0].scale, full, 0)
+    .to(room.position, { x: 1.5, y: 0.7, z: () => innerHeight * 0.0025 }, 1)
+    .to(room.scale, size(0.25), 1)
+    .to(circles[1].scale, full, 1)
+    .to(camera.position, { y: 4.7 }, 1)
+    .to(camera.position, { x: 3.56, y: 6.5 }, 3)
+    .to(circles[2].scale, full, 3)
+    .to(camera.position, { x: -0.02, y: -0.55 }, 4)
+    .to(room.position, { y: 0 }, 4)
+    .to(room.position, { x: -0.05, y: 0, z: 0 }, 5)
+    .to(room.scale, size(0.07), 5)
+    .to(camera.position, { x: 0, y: 4, z: 5 }, 5);
+}
+
+// Moves the story's playhead to match the scroll: each spacer adds its own
+// progress, so between spacers it rests on a whole second. Eases towards the
+// target the way ScrollTrigger's `scrub: 0.6` did.
+function driveStory(story: gsap.core.Timeline, live: () => boolean) {
+  let chase: gsap.core.Tween | undefined;
+  // Defined before the triggers: created mid-page (e.g. on switching to the
+  // mobile layout), a trigger calls onUpdate straight away.
+  const follow = () => {
+    if (!live()) return;
+    const time = triggers.reduce((sum, trigger) => sum + trigger.progress, 0);
+    chase = gsap.to(story, { time, duration: 0.6, ease: "expo", overwrite: true });
+  };
+
+  const triggers: ScrollTrigger[] = [];
+  for (const spacer of SPACERS) {
+    triggers.push(
+      ScrollTrigger.create({
+        trigger: spacer,
+        start: "top top",
+        end: "bottom bottom",
+        onUpdate: follow,
+      }),
+    );
+  }
+
+  // After a resize, recompute the size-based values by replaying from the
+  // start, so each step still picks up where the previous one ended.
+  const refresh = () => {
+    const time = story.time();
+    story.progress(0).invalidate().time(time);
+    follow();
+  };
+  ScrollTrigger.addEventListener("refresh", refresh);
+
+  return {
+    follow,
+    stop: () => {
+      ScrollTrigger.removeEventListener("refresh", refresh);
+      chase?.kill();
+    },
+  };
+}
+
+function desktop(targets: ScrollTargets, live: () => boolean) {
   ScrollTrigger.create({ trigger: ".hero", start: "top top", pin: true });
-
-  gsap.timeline({ scrollTrigger: across(".first-margin") })
-    .to(room.position, { x: () => innerWidth * 0.00145 });
-
-  gsap.timeline({ scrollTrigger: across(".second-margin") })
-    .to(room.position, { x: 1, z: () => innerHeight * 0.0055 }, "same")
-    .to(room.scale, size(0.4), "same");
-
-  gsap.timeline({ scrollTrigger: across(".third-margin") })
-    .to(camera.position, { x: 4, y: 3.5 });
-
-  gsap.timeline({ scrollTrigger: across(".fourth-margin") })
-    .to(camera.position, { x: 2, y: 9.2 });
-
-  gsap.timeline({ scrollTrigger: across(".fifth-margin") })
-    .to(camera.position, { x: -3.5, y: -2.3 });
-
-  gsap.timeline({ scrollTrigger: across(".sixth-margin") })
-    .to(room.position, { x: () => innerWidth * -0.00175, z: 0 }, "same")
-    .to(room.scale, size(0.11), "same")
-    .to(camera.position, { x: 0, y: 4, z: 5 }, "same");
+  return driveStory(desktopStory(targets), live);
 }
 
-function mobile({ room, camera }: ScrollTargets) {
-  gsap.timeline({ scrollTrigger: across(".first-margin") })
-    .to(room.scale, size(0.1));
-
-  gsap.timeline({ scrollTrigger: across(".second-margin") })
-    .to(room.position, { x: 1.5, z: () => innerHeight * 0.0025 }, "same")
-    .to(room.scale, size(0.25), "same");
-
-  gsap.timeline({ scrollTrigger: across(".fourth-margin") })
-    .to(camera.position, { x: 3.56, y: 6.5 });
-
-  gsap.timeline({ scrollTrigger: across(".fifth-margin") })
-    .to(camera.position, { x: -0.02, y: -0.55 });
-
-  gsap.timeline({ scrollTrigger: across(".sixth-margin") })
-    .to(room.position, { x: -0.05, y: 0, z: 0 }, "same")
-    .to(room.scale, size(0.07), "same")
-    .to(camera.position, { x: 0, y: 4, z: 5 }, "same");
+function mobile(targets: ScrollTargets, live: () => boolean) {
+  return driveStory(mobileStory(targets), live);
 }
 
-function everyLayout({ room, nodes, camera, circles }: ScrollTargets) {
+function everyLayout({ nodes }: ScrollTargets) {
   // The little outdoor platform (mailbox, lamp, flowers) pops in once.
   gsap.timeline({ scrollTrigger: { trigger: ".fourth-margin", start: "center center" } })
     .to(nodes.floor.position, { x: 3.07688, z: 2.66616, ease: "back.out(2)", duration: 0.3 })
@@ -84,20 +133,6 @@ function everyLayout({ room, nodes, camera, circles }: ScrollTargets) {
     .to(nodes.flower_pad.scale, popIn, "-=0.2")
     .to(nodes.flower001.scale, popIn)
     .to(nodes.flower002.scale, popIn, "-=0.1");
-
-  gsap.timeline({ scrollTrigger: across(".first-margin") })
-    .to(circles[0].scale, full);
-
-  gsap.timeline({ scrollTrigger: across(".second-margin") })
-    .to(circles[1].scale, full, "same")
-    .to(room.position, { y: 0.7 }, "same")
-    .to(camera.position, { y: 4.7 }, "same");
-
-  gsap.timeline({ scrollTrigger: across(".fourth-margin") })
-    .to(circles[2].scale, full);
-
-  gsap.timeline({ scrollTrigger: across(".fifth-margin") })
-    .to(room.position, { y: 0 });
 
   // Each section rounds its inner corners as it passes, and its progress
   // bar sticks to the top of the screen and fills as you read.
@@ -130,8 +165,11 @@ function everyLayout({ room, nodes, camera, circles }: ScrollTargets) {
   }
 }
 
+type Story = ReturnType<typeof driveStory>;
+
 // Smooth scrolling (replaces ASScroll) plus every scroll-driven animation.
-// Returns a cleanup function.
+// The room's story stays still until `startStory()`: before that the intro
+// is still moving the room and the two would fight over the same values.
 export function setupScroll(targets: ScrollTargets) {
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const lenis = reducedMotion ? null : new Lenis({ lerp: 0.3 });
@@ -142,17 +180,32 @@ export function setupScroll(targets: ScrollTargets) {
     gsap.ticker.lagSmoothing(0);
   }
 
+  let live = false;
+  let story: Story | undefined;
+  const isLive = () => live;
+  const use = (next: Story) => {
+    story = next;
+    story.follow();
+    return story.stop;
+  };
+
   const layouts = gsap.matchMedia();
-  layouts.add("(min-width: 969px)", () => desktop(targets));
-  layouts.add("(max-width: 968px)", () => mobile(targets));
+  layouts.add("(min-width: 969px)", () => use(desktop(targets, isLive)));
+  layouts.add("(max-width: 968px)", () => use(mobile(targets, isLive)));
   const shared = gsap.context(() => everyLayout(targets));
 
-  return () => {
-    layouts.revert();
-    shared.revert();
-    if (lenis) {
-      gsap.ticker.remove(raf);
-      lenis.destroy();
-    }
+  return {
+    startStory() {
+      live = true;
+      story?.follow();
+    },
+    cleanup() {
+      layouts.revert();
+      shared.revert();
+      if (lenis) {
+        gsap.ticker.remove(raf);
+        lenis.destroy();
+      }
+    },
   };
 }

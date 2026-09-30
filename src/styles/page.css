@@ -45,6 +45,12 @@
   transform: scale(0.7);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .arrow-svg-wrapper {
+    animation: none;
+  }
+}
+
 /* The welcome line only exists for the room's intro. Without the room (no
    WebGL, or the model failed), the hero shows its after-intro state. */
 html:not(.has-room) .intro-text {
@@ -74,6 +80,37 @@ html:not(.has-room) .intro-text {
   left: 0;
   width: 100%;
   height: 100vh;
+}
+
+/* Without the room (no WebGL, no JavaScript, or the model failed to load), a
+   still of the finished room sits where the canvas would be. The images are
+   only requested when this applies. */
+.room-still {
+  display: none;
+}
+
+html:not(.has-room) .room-still {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: url("/stills/room-wide-day.webp") center / cover no-repeat;
+}
+
+html.dark-theme:not(.has-room) .room-still {
+  background-image: url("/stills/room-wide-night.webp");
+}
+
+@media (max-width: 968px) {
+  html:not(.has-room) .room-still {
+    background-image: url("/stills/room-tall-day.webp");
+  }
+
+  html.dark-theme:not(.has-room) .room-still {
+    background-image: url("/stills/room-tall-night.webp");
+  }
 }
 
 /* The page sits over the room. Let pointer events through its empty areas
