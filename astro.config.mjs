@@ -37,6 +37,8 @@ export default defineConfig({
         "connect-src 'self' blob:",
         // The Draco decoder runs in a worker made from a blob: URL.
         "worker-src 'self' blob:",
+        // The YouTube player on the room's monitor.
+        "frame-src https://www.youtube-nocookie.com",
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",

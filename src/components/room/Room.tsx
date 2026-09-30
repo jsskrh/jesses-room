@@ -2,6 +2,7 @@ import { Component, Suspense, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { inRoomMode, leaveRoomMode, setRoomState } from "./mode";
+import type { MonitorClip } from "./monitor";
 import Scene, { loadRoom } from "./Scene";
 
 if (inRoomMode()) {
@@ -38,8 +39,8 @@ class RoomErrorBoundary extends Component<{ children: ReactNode }, { failed: boo
 }
 
 interface RoomProps {
-  // A video for the monitor's screen.
-  monitor?: string;
+  // What plays on the monitor.
+  monitor?: MonitorClip;
 }
 
 export default function Room({ monitor }: RoomProps) {
@@ -48,6 +49,8 @@ export default function Room({ monitor }: RoomProps) {
   return (
     <RoomErrorBoundary>
       <div className="experience">
+        {/* Behind the canvas, seen through the monitor's screen. */}
+        <div className="monitor-layer" aria-hidden="true" />
         <Canvas
           orthographic
           shadows="percentage"

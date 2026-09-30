@@ -10,4 +10,7 @@ export const site = {
   // Link preview image, 1200x630.
   image: { path: "/og.jpg", alt: "Jesse's Room: an isometric 3D room, with Jesse K. Akorah, Software Engineer" },
   profiles: ["https://www.linkedin.com/in/jesse-akorah-1a54a11a1", "https://github.com/jsskrh"],
+  // Plays on the room's monitor: a YouTube video, muted, looping between
+  // two points (seconds).
+  monitor: { youtube: "YctxzUbj4Ng", from: 45, to: 82 },
 };

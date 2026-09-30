@@ -82,6 +82,19 @@ html:not(.has-room) .intro-text {
   height: 100vh;
 }
 
+/* The monitor's video plays in this layer, behind the canvas, seen through
+   the screen. */
+.monitor-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.monitor-player {
+  border: 0;
+  background-color: #000;
+  pointer-events: none;
+}
+
 /* Without the room (no WebGL, no JavaScript, or the model failed to load), a
    still of the finished room sits where the canvas would be. The images are
    only requested when this applies. */

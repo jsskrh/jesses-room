@@ -1,4 +1,4 @@
-import { use, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { use, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import gsap from "gsap";
 import * as THREE from "three";
@@ -8,7 +8,7 @@ import { setupBooks, type Bookshelf } from "./books";
 import { addCovers } from "./covers";
 import { playIntro } from "./intro";
 import { prepareRoom } from "./model";
-import { playOnMonitor } from "./monitor";
+import { playOnMonitor, type MonitorClip } from "./monitor";
 import { setupScroll } from "./scroll";
 import { arrivalSpot, clearSpot, rememberSpotOnLeaving } from "./spot";
 
@@ -70,8 +70,8 @@ function FrustumZoom() {
 }
 
 interface SceneProps {
-  // A video for the monitor's screen.
-  monitor?: string;
+  // What plays on the monitor.
+  monitor?: MonitorClip;
 }
 
 export default function Scene({ monitor }: SceneProps) {
@@ -87,6 +87,8 @@ export default function Scene({ monitor }: SceneProps) {
   const ambient = useRef<THREE.AmbientLight>(null!);
   const spin = useRef({ y: 0 });
   const tilt = useRef({ current: 0, target: 0 });
+  const [settled, setSettled] = useState(false);
+  const onMonitor = useRef<ReturnType<typeof playOnMonitor> | null>(null);
 
   // Lighting follows the theme class on <html>: set on load, eased on toggle.
   useEffect(() => {
@@ -127,6 +129,7 @@ export default function Scene({ monitor }: SceneProps) {
     const t = tilt.current;
     t.current = THREE.MathUtils.damp(t.current, t.target, 6.3, delta);
     room.rotation.y = spin.current.y + t.current;
+    onMonitor.current?.render(camera);
   });
 
   useEffect(() => addCovers(nodes), [nodes]);
@@ -138,7 +141,6 @@ export default function Scene({ monitor }: SceneProps) {
   useEffect(() => {
     const spot = arrivalSpot();
     let scroll: ReturnType<typeof setupScroll> | undefined;
-    let stopMonitor: (() => void) | undefined;
     const stopIntro = playIntro(
       { room, nodes, plane: plane.current, spin: spin.current },
       {
@@ -154,18 +156,31 @@ export default function Scene({ monitor }: SceneProps) {
         },
         onSettled: () => {
           scroll?.startStory({ immediate: Boolean(spot) });
-          if (monitor) stopMonitor = playOnMonitor(nodes, monitor);
+          setSettled(true);
         },
       },
     );
     return () => {
       stopIntro();
-      stopMonitor?.();
       scroll?.cleanup();
       shelf.current?.cleanup();
       shelf.current = null;
     };
-  }, [room, nodes, camera, canvas, monitor]);
+  }, [room, nodes, camera, canvas]);
+
+  // The monitor's video loads once the room has settled after the intro.
+  // With reduced motion, the screen stays dark rather than play on its own.
+  useEffect(() => {
+    const layer = canvas.closest(".experience")?.querySelector<HTMLElement>(".monitor-layer");
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!settled || !monitor || !layer || reducedMotion) return;
+    const playing = playOnMonitor(nodes, monitor, { layer, canvas });
+    onMonitor.current = playing;
+    return () => {
+      playing.stop();
+      onMonitor.current = null;
+    };
+  }, [settled, monitor, nodes, canvas]);
 
   // Dev server only: a handle for inspecting (and rendering) the scene from
   // the console.
