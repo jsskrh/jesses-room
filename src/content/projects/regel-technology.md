@@ -5,7 +5,7 @@ bookNode: Project013
 url: https://www.regeltechnology.com
 summary:
   - >-
-    A Software-as-a-Service (SaaS) platform for sending SMS and OTP messages. I developed the platform's core APIs, enabling companies to seamlessly integrate SMS and OTP functionalities into their systems.
+    A communications platform as a service (CPaaS) delivering SMS, email, OTP and SMPP services to SMEs and developers. As Head of Engineering, I architected and engineered its core system from the ground up, managing the entire full-stack lifecycle.
 role: Head of Engineering
 period: 2025 – Present
 stack:
@@ -14,13 +14,9 @@ stack:
   - REST APIs
   - SMPP
 ---
-## The product
-
-Regel Technology is a communications platform as a service (CPaaS), delivering SMS, email, OTP and SMPP services to SMEs and developers.
-
 ## What I did
 
-I lead the engineering function, and I architected and built the platform's core system from the ground up, across the full stack.
+I lead the engineering function at Regel Technology.
 
 - **Developer APIs:** secure API infrastructure, including the generation and management of API keys and endpoints for developers integrating with the platform.
 - **Messaging:** in-app notifications, REST APIs and the SMPP protocol.
